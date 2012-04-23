@@ -29,8 +29,8 @@ public class AudioCapture extends Thread{
 		_targetType = AudioFileFormat.Type.WAVE;
 		_audioFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100.0F, 16, 2, 4, 44100.0F, false);
 		_inputDevice = input;
-		_output = new File("recOutput");
-		this.testFile = new File("a.wav");
+		_output = new File("/Users/christian/Music/recOutput");
+		this.testFile = new File("/Users/christian/Music/a.wav");
 	}
 			
 	public void startRecording(){
@@ -53,7 +53,7 @@ public class AudioCapture extends Thread{
 	// Get the audio data
 	public AudioInputStream getAudio(){		
 		try {
-			AudioInputStream in = AudioSystem.getAudioInputStream(_output);
+			AudioInputStream in = AudioSystem.getAudioInputStream(this.testFile);
 			//int frameLength = (int) in.getFrameLength();
 			//int frameSize = (int) in.getFormat().getFrameSize();
 			//int numOfChannels = in.getFormat().getChannels();
