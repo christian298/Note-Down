@@ -7,9 +7,11 @@ import java.io.IOException;
 
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Mixer;
+import javax.xml.crypto.Data;
 
 import capture.AudioCapture;
-import fourier.DFT;
+import dsp.DFT;
+import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 
 public class NoteDown {
 
@@ -38,10 +40,16 @@ public class NoteDown {
 		}
 		
 		DFT dft = new DFT();
-		int date[] = dft.transform(ac.getAudio());
-		dft.performDFT2(date);
+		double date[] = dft.transform(ac.getAudio());
+		System.out.println("date length before: " + date.length);
 		
-		 
+		//dft.performDFT2(date);
+		DoubleFFT_1D fft = new DoubleFFT_1D(date.length);
+		fft.realForward(date);
+		System.out.println("date length after: " + date.length);
+		/*for(int i = 0; i < date.length / 2; i++){
+			System.out.println("Mag: " + Math.sqrt(Math.sqrt(date[2*i]) + Math.sqrt(date[2*i+1])));
+		}*/
 	}
 
 }

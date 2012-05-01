@@ -31,6 +31,7 @@ public class AudioCapture extends Thread{
 		_inputDevice = input;
 		_output = new File("/Users/christian/Music/recOutput");
 		this.testFile = new File("/Users/christian/Music/a.wav");
+		System.out.println("Used file: " + this.testFile.getName());
 	}
 			
 	public void startRecording(){
@@ -38,6 +39,7 @@ public class AudioCapture extends Thread{
 			_line = AudioSystem.getTargetDataLine(_audioFormat, _inputDevice);
 			_line.open(_audioFormat);
 			_line.start();
+			System.out.println("Level: " + _line.getLevel());
 			_audioInputStream = new AudioInputStream(_line);
 			super.start();
 		} catch (LineUnavailableException e) {
@@ -73,7 +75,7 @@ public class AudioCapture extends Thread{
 	
 	public void run(){
 		try {
-			AudioSystem.write(_audioInputStream, _targetType, this.testFile);
+			AudioSystem.write(_audioInputStream, _targetType, _output);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
