@@ -5,6 +5,11 @@ import java.io.IOException;
 import javax.sound.sampled.AudioInputStream;
 
 public class DFT extends Fourier{
+	DFT(int ts, float sr) {
+		super(ts, sr);
+		// TODO Auto-generated constructor stub
+	}
+
 	private int _n;
 	private float _sampleRate;
 	private float _T;
@@ -66,5 +71,35 @@ public class DFT extends Fourier{
 		}
 		
 				
+	}
+
+	@Override
+	protected void allocateArrays() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setBand(int i, float a) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void scaleBand(int i, float s) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void forward(float[] buffer) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void inverse(float[] buffer) {
+		// TODO Auto-generated method stub
+		
 	}
 }

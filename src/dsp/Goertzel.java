@@ -79,7 +79,7 @@ public class Goertzel {
      * @param offset index of the first sample of the signal.
      * @return the power of the specified frequency
      */
-    public double getPower(double[] signal, int offset) {
+    public double getPower(float[] signal, int offset) {
         int M = hamming.length + offset;
         double power;
         //hamming window
@@ -127,7 +127,7 @@ public class Goertzel {
     	this.fretboard.put("E7", 123.50);
     	this.fretboard.put("secE5", 440.00);
     }
-    public void myAlgo(double targetFreq, int n, double[] audioData){
+    public double myAlgo (float targetFreq, int n, float[] audioData){
     	double real = 2 * Math.cos(2 * Math.PI * targetFreq / n);
     	double imag = Math.sin(2 * Math.PI * targetFreq / n);
     	double y = 0;
@@ -141,5 +141,7 @@ public class Goertzel {
     	}
     	double resultReal = 0.5 * real * d1 - d2;
     	double resultImag = imag * d1;
+    	
+    	return (Math.sqrt((resultReal * resultReal) + (resultImag * resultImag)));
     }
 }

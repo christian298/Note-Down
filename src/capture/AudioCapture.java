@@ -14,6 +14,8 @@ import javax.sound.sampled.TargetDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 public class AudioCapture extends Thread{
+	private final static int BUFFER_SIZE = 1024;
+	
 	// Receives audio data from mixer
 	private TargetDataLine tdLine;
 	// Format of the audio data
@@ -26,6 +28,7 @@ public class AudioCapture extends Thread{
 	private boolean recording;
 	private ByteArrayOutputStream out;
 	private byte[] audioBytes;
+	private byte[] buffer = new byte[BUFFER_SIZE];
 	
 	// Constructor, set initial values
 	public AudioCapture(Mixer.Info input) {
@@ -37,7 +40,9 @@ public class AudioCapture extends Thread{
 		inputDevice = input;
 		
 		// Output file of the recording
-		output = new File("/Users/christian/Music/recOutput");
+		this.output = new File("/Users/christian/Music/recOutput");
+		
+		// Test file
 		this.testFile = new File("/Users/christian/Music/sin440.wav");
 	}
 	
@@ -65,12 +70,13 @@ public class AudioCapture extends Thread{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		this.audioBytes = this.out.toByteArray();
-		System.out.println("AudioLenght: " + this.audioBytes.length);
+		
+		// 
+		this.audioBytes = this.out.toByteArray();		
 	}
 	
-	// Get the audio data from file
-	public AudioInputStream getAudio(){		
+	// Read the audio data from file
+	public AudioInputStream getAudioFromFile(){		
 		try {
 			System.out.println("td: " + tdLine.available());
 			AudioInputStream in = AudioSystem.getAudioInputStream(this.testFile);
@@ -90,8 +96,10 @@ public class AudioCapture extends Thread{
 		int numBytesRead = 0;
 		this.out = new ByteArrayOutputStream();
 		
+		// Fill buffer until user stops recording
 		while(this.recording){
 			System.out.println("Recording...");
+			// Write buffer while audiodata available
 			if ((numBytesRead = tdLine.read(data, 0, bufferLengthInBytes)) != -1){
 				this.out.write(data, 0, numBytesRead);
 			}
@@ -107,9 +115,10 @@ public class AudioCapture extends Thread{
 		return this.audioBytes;
 	}
 	
-	public double[] getAudioData(AudioInputStream in){
+	public float[] getAudioData(AudioInputStream in){
 		byte[] abytes = new byte[(int)in.getFrameLength() * in.getFormat().getFrameSize()];
-		double[] audio = new double[(int)in.getFrameLength() * in.getFormat().getFrameSize()];
+		float[] audio = new float[(int)in.getFrameLength() * in.getFormat().getFrameSize()];
+		float[] adata = new float[1024];
 		float sampleRate = in.getFormat().getSampleRate();		
 		float T = in.getFrameLength() / in.getFormat().getFrameRate();
 		int n = (int) (T *  sampleRate) / 2;
@@ -120,9 +129,23 @@ public class AudioCapture extends Thread{
 			e.printStackTrace();
 		}
 		
-		for(int i = 0; i < n; i++){
-			audio[i] = abytes[i];
+		for(int i = 0; i < 1024; i++){
+			//audio[i] = abytes[i];
+			adata[i] = abytes[i];
 		}
-		return audio;
+		return adata;
+	}
+	
+	// generat a sound
+	public double[] generateSound(float frequency, float samplingRate, float duration){
+		double[] pcm = new double[(int) (samplingRate * duration)];
+		float increment = 2 * (float) Math.PI * frequency * duration;
+		float angle = 0;
+		
+		for(int i = 0; i < pcm.length; i++){
+			pcm[i] = Math.sin(angle);
+			angle += increment;
+		}
+		return pcm;
 	}
 }
