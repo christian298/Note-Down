@@ -43,7 +43,7 @@ public class AudioCapture extends Thread{
 		this.output = new File("/Users/christian/Music/recOutput");
 		
 		// Test file
-		this.testFile = new File("/Users/christian/Music/sin440.wav");
+		this.testFile = new File("/Users/christian/Music/a.wav");
 	}
 	
 	// start recording from input device

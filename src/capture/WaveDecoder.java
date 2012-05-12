@@ -112,14 +112,5 @@ public class WaveDecoder implements Decoder
 		}
 		
 		return readSamples; 
-	}
-	
-	public static void main( String[] args ) throws FileNotFoundException, Exception
-	{
-		WaveDecoder decoder = new WaveDecoder( new FileInputStream( "samples/sample.wav" ) );
-		float[] samples = new float[1024];
-		int readSamples = 0;
-		while( ( readSamples = decoder.readSamples( samples ) ) > 0 )
-			System.out.println( "read " + readSamples + " samples" );
-	}
+	}	
 }

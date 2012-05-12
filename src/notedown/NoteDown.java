@@ -65,14 +65,14 @@ public class NoteDown {
 				
 					
 		
-		//OnsetDetection os = new OnsetDetection(adata);
+		OnsetDetection od = new OnsetDetection(1024);
 		//Goertzel g = new Goertzel(660, 1024, 1.0);
 	     // System.out.println("G: " + (g.myAlgo(600.0f, 1024, samples)));
 	      
 		
 		WaveDecoder decoder = null;
 		try {
-			decoder = new WaveDecoder( new FileInputStream( "/Users/christian/Music/silence.wav"));
+			decoder = new WaveDecoder( new FileInputStream( "/Users/christian/Music/a.wav"));			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -81,32 +81,13 @@ public class NoteDown {
 	      FFT fft = new FFT( 1024, 44100 );
 	      fft.window( FFT.HAMMING );
 	      float[] samples = new float[1024];
-	      float[] spectrum = new float[1024 / 2 + 1];
-	      float[] lastSpectrum = new float[1024 / 2 + 1];
-	      List<Float> spectralFlux = new ArrayList<Float>( );
-	      List<Float> threshold = new ArrayList<Float>( );
-	 
-	      int x = 0;
+
 	      while( decoder.readSamples( samples ) > 0 )
-	      {	
-	    	 System.out.println(x + " Samples length: " + samples.length);
-	    	 x++;
-	         fft.forward( samples );
-	         //System.out.println("Freq: " + fft.getFreq(440.0f));
-	         System.arraycopy( spectrum, 0, lastSpectrum, 0, spectrum.length ); 
-	         System.arraycopy( fft.getSpectrum(), 0, spectrum, 0, spectrum.length );
-	         
-	          
-	         float flux = 0;
-	         for( int i = 0; i < spectrum.length; i++ )	
-	         {
-	            float value = (spectrum[i] - lastSpectrum[i]);
-	            flux += value < 0? 0: value;
-	         }
-	         spectralFlux.add( flux );					
+	      {		    	
+	    	 fft.forward( samples );
+	    	 od.setAudioData(samples);
+	    	 od.calculateSpectrumFlux(fft.getSpectrum());				
 	      }		
-	      /*for(int x = 0; x < spectralFlux.size(); x++){
-	    	  System.out.println(x + " Flux: " + spectralFlux.get(x));
-	      }*/
+	      od.getPeaks();
 	}
 }
