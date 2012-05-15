@@ -56,10 +56,9 @@ public class OnsetDetection {
 			flux += value < 0 ? 0 : value;
 		}
 		spectralFlux.add(flux);
-		this.findPeaks();
 	}
 
-	private void findPeaks() {
+	public void findPeaks() {
 		for (int x = 0; x < this.spectralFlux.size(); x++) {
 			int start = Math.max(0, x - 10);
 			int end = Math.min(this.spectralFlux.size() - 1, x + 10);
@@ -91,20 +90,33 @@ public class OnsetDetection {
 		}
 	}
 
-	public int getIndex(int time) {
+	public int getIndex(float time) {
 		double sammplinRate = 44100.0;
 		int index = (int) (time * sammplinRate);
 		return index;
 	}
-
-	public float getTimeOfPeaks() {		
-		float time = 0;
-		for(int i = 0; i < this.peaks.size(); i++){
-			if(this.peaks.get(i) >= 5){
-				time = i * (1024 / 44100);
+	
+	/**
+	 * Get the start and end time of the peaks 
+	 * @return ArrayList Returns an list of peaks
+	 */
+	public ArrayList<Peak> getTimeOfPeaks() {				
+		ArrayList<Peak> peakList = new ArrayList<Peak>();
+		float startTime = 0;
+		float endTime = 0;
+		boolean foundStart = false;		
+		
+		for(int i = 0; i < this.peaks.size() - 1; i++){
+			if(this.peaks.get(i) >= 1.0f && !foundStart){
+				startTime = i * (1024f / 44100f);
+				foundStart = true;
+			} else if (foundStart && this.peaks.get(i + 1) < 1.0f){
+				endTime = i * (1024f / 44100f);				
+				peakList.add(new Peak(startTime, endTime));
+				foundStart = false;
 			}
 		}		 
-		return time;
+		return peakList;
 	}
 
 	public void setAudioData(float[] audioData) {

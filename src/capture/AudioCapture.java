@@ -118,7 +118,7 @@ public class AudioCapture extends Thread{
 	public float[] getAudioData(AudioInputStream in){
 		byte[] abytes = new byte[(int)in.getFrameLength() * in.getFormat().getFrameSize()];
 		float[] audio = new float[(int)in.getFrameLength() * in.getFormat().getFrameSize()];
-		float[] adata = new float[1024];
+		//float[] adata = new float[(int)in.getFrameLength() * in.getFormat().getFrameSize()];
 		float sampleRate = in.getFormat().getSampleRate();		
 		float T = in.getFrameLength() / in.getFormat().getFrameRate();
 		int n = (int) (T *  sampleRate) / 2;
@@ -129,11 +129,11 @@ public class AudioCapture extends Thread{
 			e.printStackTrace();
 		}
 		
-		for(int i = 0; i < 1024; i++){
-			//audio[i] = abytes[i];
-			adata[i] = abytes[i];
+		for(int i = 0; i < n; i++){
+			audio[i] = abytes[i];
+			//adata[i] = abytes[i];
 		}
-		return adata;
+		return audio;
 	}
 	
 	// generat a sound

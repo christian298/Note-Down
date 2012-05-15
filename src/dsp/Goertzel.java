@@ -110,8 +110,7 @@ public class Goertzel {
         			System.out.println("Note: " + this.fretboard.keySet().toArray()[x]);
         		}
         	}
-        }
-        
+        }        
         return power;
     }
     
@@ -125,6 +124,15 @@ public class Goertzel {
     	this.fretboard.put("E6", 116.5);
     	this.fretboard.put("E7", 123.50);
     	this.fretboard.put("E7", 123.50);
+    	this.fretboard.put("A0", 110.00);
+    	this.fretboard.put("A1", 116.50);
+    	this.fretboard.put("A2", 123.50);
+    	this.fretboard.put("D0", 146.80);
+    	this.fretboard.put("D1", 155.60);
+    	this.fretboard.put("D2", 164.80);
+    	this.fretboard.put("G0", 196.00);
+    	this.fretboard.put("G1", 207.60);
+    	this.fretboard.put("G2", 220.00);
     	this.fretboard.put("secE5", 440.00);
     }
     public double myAlgo (float targetFreq, int n, float[] audioData){
@@ -144,4 +152,6 @@ public class Goertzel {
     	
     	return (Math.sqrt((resultReal * resultReal) + (resultImag * resultImag)));
     }
+    
+    
 }
