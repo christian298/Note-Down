@@ -13,12 +13,16 @@ import capture.WaveDecoder;
 import dsp.DFT;
 import dsp.FFT;
 import dsp.Goertzel;
+import dsp.PCP;
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 
 public class NoteDown {
 
 	public static void main(String[] args) {
-
+		float[] samples = new float[16384];
+		float[] samples2 = new float[1024];
+		ArrayList<float[]> originalAudioSamples = new ArrayList<float[]>();		
+		
 		// Get available audio devices
 		Mixer.Info[] aInfos = AudioSystem.getMixerInfo();
 		for (int i = 0; i < aInfos.length; i++) {
@@ -64,58 +68,70 @@ public class NoteDown {
 		// System.out.println("Values: " + adata[x]);
 		// }
 
+		// Initialize instance for onset detection
 		OnsetDetection od = new OnsetDetection(1024);
+		PCP p = new PCP();
 
+		// Read the audio file
 		WaveDecoder decoder = null;
 		try {
-			decoder = new WaveDecoder(new FileInputStream(
-					"/Users/christian/Music/a.wav"));
+			decoder = new WaveDecoder(new FileInputStream("/Users/christian/Music/sin196.wav"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		FFT fft = new FFT(1024, 44100);
-		fft.window(FFT.HAMMING);
-		float[] samples = new float[1024];
-		ArrayList<float[]> full = new ArrayList<float[]>();		
+		
+		// Initialize an fft instance 
+		FFT fft = new FFT(16384, 44100);
+		
+		// Use Hamming-window for the signal
+		fft.window(FFT.HAMMING);		
+		int count = 0;
+		// Read samples from audio file
 		while (decoder.readSamples(samples) > 0) {
-			full.add(samples);
+			// Store untouched samples
+			//originalAudioSamples.add(samples);
+			
+			// Perform FFT
 			fft.forward(samples);
-			od.setAudioData(samples);
-			od.calculateSpectrumFlux(fft.getSpectrum());
+			originalAudioSamples.add(samples);
+			// Calculate the spectrum flux for the given sample
+			od.setAudioData(samples);			
+			p.createProfile(fft, 16384);
+			
+			od.calculateSpectrumFlux(fft.getSpectrum());		
+			//System.out.println(count + " Power: " + fft.getFreq(87));
+			count++;
 		}
+		System.out.println("Sample count: " + originalAudioSamples.size());
+		
+		
+		// Find peaks/onsets an store them in a list
 		od.findPeaks();
 		ArrayList<Peak> peaks = od.getTimeOfPeaks();
-		int start = 0;
-		int end = 0;
+		int startIndex = 0;
+		int endIndex = 0;
+		
+		
+		MusicAnalyser ma = new MusicAnalyser();
+		FFT fft2 = new FFT(16384, 44100);
+		fft2.window(FFT.HAMMING);
 		
 		for (int x = 0; x < peaks.size(); x++) {
 			System.out.println("Start: " + peaks.get(x).getStartTime());
 			System.out.println("Start index: " + od.getIndex(peaks.get(x).getStartTime()));
-			start = od.getIndex(peaks.get(x).getStartTime());
+			startIndex = od.getIndex(peaks.get(x).getStartTime());
 
 			System.out.println("Ende: " + peaks.get(x).getEndTime());
 			System.out.println("End index: " + od.getIndex(peaks.get(x).getEndTime()));
-			end = od.getIndex(peaks.get(x).getEndTime());
+			endIndex = od.getIndex(peaks.get(x).getEndTime());
 			
-			float[] segment = new float[end - start]; 
-			int i = 0;				 
-			for(int s = start; s < end; s ++){ 
-				  segment[i] = adata[s]; 
-				  i++; 
-			}
-			System.out.println("adata length: " + adata.length);
-			Goertzel g = new Goertzel(220, end - start, peaks.get(x).getEndTime() - peaks.get(x).getStartTime());
-			System.out.println("goertzl_1: " + g.getPower(segment, 0));
-
+			for(int z = startIndex; z <= endIndex; z++){							
+				fft2.forward(originalAudioSamples.get(z));		
+				//System.out.println("Pow: " + fft2.getBand(2));
+				//ma.getNotesInSignal(fft2);
+			}					
 		}
-		 
-	
-		
-		//Goertzel g2 = new Goertzel(207, end - start, 1.0);
-
-		 //System.out.println("goertzl_2: " + g2.getPower(segment, 0));
-
 	}
 }

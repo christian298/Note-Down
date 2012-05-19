@@ -47,8 +47,7 @@ public class OnsetDetection {
 	 *            The spectrum of the current sample
 	 */
 	public void calculateSpectrumFlux(float[] fftSpectrum) {
-		System.arraycopy(this.spectrum, 0, this.lastSpectrum, 0,
-				this.spectrum.length);
+		System.arraycopy(this.spectrum, 0, this.lastSpectrum, 0, this.spectrum.length);
 		System.arraycopy(fftSpectrum, 0, this.spectrum, 0, this.spectrum.length);
 		float flux = 0;
 		for (int i = 0; i < spectrum.length; i++) {
@@ -57,7 +56,10 @@ public class OnsetDetection {
 		}
 		spectralFlux.add(flux);
 	}
-
+	
+	/**
+	 * Finds the peaks in the Audiodata, based on the spectral flux. 
+	 */
 	public void findPeaks() {
 		for (int x = 0; x < this.spectralFlux.size(); x++) {
 			int start = Math.max(0, x - 10);
@@ -86,13 +88,18 @@ public class OnsetDetection {
 			}
 		}
 		for (int y = 0; y < this.peaks.size(); y++) {
-			System.out.println(" Peaks: " + this.peaks.get(y));
+			System.out.println(y + " Peaks: " + this.peaks.get(y));
 		}
 	}
-
+	
+	/**
+	 * Gets the index of the sample where which contains the time 
+	 * @param time The time which will converted to the index
+	 * @return index Returns the index of the Peal
+	 */
 	public int getIndex(float time) {
 		double sammplinRate = 44100.0;
-		int index = (int) (time * sammplinRate);
+		int index = (int) (time * sammplinRate) / 1024;
 		return index;
 	}
 	
@@ -118,7 +125,11 @@ public class OnsetDetection {
 		}		 
 		return peakList;
 	}
-
+	
+	/**
+	 * Sets the audiodata to looking for onsets
+	 * @param audioData The audiodata to be analyzed
+	 */
 	public void setAudioData(float[] audioData) {
 		this.audio = audioData;
 	}
