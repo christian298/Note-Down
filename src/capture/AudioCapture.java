@@ -136,7 +136,7 @@ public class AudioCapture extends Thread{
 		return audio;
 	}
 	
-	// generat a sound
+	// Generat a sound
 	public double[] generateSound(float frequency, float samplingRate, float duration){
 		double[] pcm = new double[(int) (samplingRate * duration)];
 		float increment = 2 * (float) Math.PI * frequency * duration;

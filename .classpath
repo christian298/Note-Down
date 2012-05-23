@@ -3,5 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="/Users/christian/Downloads/jtransforms-2.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/christian/Development/Java/Note-Down/lib/weka.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/christian/Development/Java/Note-Down/lib/jMusic1.6.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

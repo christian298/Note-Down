@@ -2,8 +2,13 @@ package notedown;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
+
+import com.sun.org.apache.bcel.internal.generic.NEW;
 
 import dsp.FFT;
 
@@ -11,26 +16,19 @@ public class MusicAnalyser {
     private Map<String, Number> fretboard = new HashMap<String, Number>();
     private ArrayList<Float> ampList = new ArrayList<Float>();
     private Map<Float, Float> notes = new HashMap<Float, Float>();
+    private Set<Float> maxFreq = new HashSet<Float>();
 
     public MusicAnalyser(){
     	this.fillFretboardMap();
     }
     
 	public void getNotesInSignal(FFT f){
-		/*for(int i = 0; i < this.fretboard.size(); i++){
-			float amp = f.getFreq((float) this.fretboard.values().toArray()[i]);
-			if(amp > 20.00){
-				System.out.println(this.fretboard.values().toArray()[i] + " Am: " + amp);
-				this.notes.put((Number) this.fretboard.values().toArray()[i], amp);
-			}
-		}*/
-				
 		// Octave 2 to 5
 		for(int o = 2; o <= 5; o++){
 			// Notes 0 to 11
 			for(int n = 0; n <= 11; n++){
 				float amp = f.getFreq(this.calculateFrequencyOfNote(o, n));
-				if(amp > 5.00){
+				if(amp > 1.00){
 					//System.out.println("Amp: " + amp);
 					this.notes.put(amp, this.calculateFrequencyOfNote(o, n));
 				}
@@ -39,6 +37,9 @@ public class MusicAnalyser {
 		this.findMaxAmplitude();
 	}
 	
+	/**
+	 * Find the frequency with max. amplitude
+	 */
 	private void findMaxAmplitude(){
 		float tmpAmpl = 0;
 		float tmpNote = 0;
@@ -48,9 +49,9 @@ public class MusicAnalyser {
 	        if((float)pairs.getKey() > tmpAmpl){
 	        	tmpAmpl = (float)pairs.getKey();
 	        	tmpNote = (float)pairs.getValue();
-	        }
-	        //System.out.println(pairs.getKey() + " = " + pairs.getValue());
-	        //System.out.println("Amp: " + tmpAmpl + " Note: " + tmpNote);
+	        }	        
+	        System.out.println("Amp: " + tmpAmpl + " Note: " + tmpNote);
+	        maxFreq.add(tmpNote);
 	    }	    	    
 	}
 	
@@ -96,11 +97,43 @@ public class MusicAnalyser {
      * @return Returns the frequency of an note as float
      */
     public float calculateFrequencyOfNote(int octave, int note){
-    	float freq = (float) (Math.pow(2, ((note - 9) / 12 + octave - 4)) * 440);
+    	float freq = (float) (Math.pow(2, ((note - 9f) / 12f + octave - 4f)) * 440f);
     	return freq;
     }
     
-    private void getHighestAmplitude(){
-    	
+    public Set<Float> getMaxFrequencys(){
+    	return this.maxFreq;
+    }
+    
+    public String getNameOfNote(float f){
+    	for(int i = 0; 0 < 12; i++){
+			if(f % this.calculateFrequencyOfNote(2, i) == 0){
+				if(i == 0){
+					return "C";
+				} else if(i == 1){
+					return "C#";
+				} else if(i == 2){
+					return "D";
+				} else if(i == 3){
+					return "D#";
+				} else if(i == 4){
+					return "E";
+				} else if(i == 5){
+					return "F";
+				} else if(i == 6){
+					return "F#";
+				} else if(i == 7){
+					return "G";
+				} else if(i == 8){
+					return "G#";
+				} else if(i == 9){
+					return "A";
+				} else if(i == 10){
+					return "A#";
+				} else if(i == 11){
+					return "H";
+				}
+			}
+		}
     }
 }

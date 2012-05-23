@@ -17,6 +17,7 @@ public class OnsetDetection {
 	private List<Float> threshold;
 	private List<Float> cleanedSpectralFlux;
 	private List<Float> peaks;
+	private int sampleSize;
 
 	/**
 	 * Initialize OnsetDetection instance
@@ -31,6 +32,7 @@ public class OnsetDetection {
 		this.threshold = new ArrayList<Float>();
 		this.cleanedSpectralFlux = new ArrayList<Float>();
 		this.peaks = new ArrayList<Float>();
+		this.sampleSize = sampleSize;
 	}
 
 	/**
@@ -98,8 +100,8 @@ public class OnsetDetection {
 	 * @return index Returns the index of the Peal
 	 */
 	public int getIndex(float time) {
-		double sammplinRate = 44100.0;
-		int index = (int) (time * sammplinRate) / 1024;
+		double samplinRate = 44100.0;
+		int index = (int) (time * samplinRate) / this.sampleSize;
 		return index;
 	}
 	
@@ -115,10 +117,10 @@ public class OnsetDetection {
 		
 		for(int i = 0; i < this.peaks.size() - 1; i++){
 			if(this.peaks.get(i) >= 1.0f && !foundStart){
-				startTime = i * (1024f / 44100f);
+				startTime = i * (this.sampleSize / 44100f);
 				foundStart = true;
 			} else if (foundStart && this.peaks.get(i + 1) < 1.0f){
-				endTime = i * (1024f / 44100f);				
+				endTime = i * (this.sampleSize / 44100f);				
 				peakList.add(new Peak(startTime, endTime));
 				foundStart = false;
 			}

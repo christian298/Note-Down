@@ -4,23 +4,20 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Mixer;
+
+import jm.util.Read;
 import capture.AudioCapture;
 import capture.WaveDecoder;
-import dsp.DFT;
 import dsp.FFT;
-import dsp.Goertzel;
 import dsp.PCP;
-import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 
 public class NoteDown {
 
 	public static void main(String[] args) {
 		float[] samples = new float[16384];
-		float[] samples2 = new float[1024];
+		float[] tmpSamples = new float[16384];
 		ArrayList<float[]> originalAudioSamples = new ArrayList<float[]>();		
 		
 		// Get available audio devices
@@ -47,35 +44,19 @@ public class NoteDown {
 			e.printStackTrace();
 		}
 
-		float[] adata = ac.getAudioData(ac.getAudioFromFile());
-		// DFT dft = new DFT();
-		// double audioData[] = dft.transform(ac.getAudio());
-		// dft.performDFT2(adata, 4096);
+		//float[] adata = ac.getAudioData(ac.getAudioFromFile());
+		float data[] = Read.audio("/Users/christian/Music/e1.wav");
+
 		System.out.println("Audio byte length: " + ac.getAudioBytes().length);
 
-		// FFT fft = new FFT(1024, 44100);
-		// double audioData[] = fft.transform(ac.getAudio());
-		// fft.performFFT(adata);
-		// fft.forward(adata);
-		// for(int x = 0; x < 1024; x++){
-		/*
-		 * System.out.println("adataRe: " + adata[2*x]);
-		 * System.out.println("adataIM: " + adata[2*x+1]); double mag =
-		 * Math.pow(adata[2*x], 2) + Math.pow(adata[2*x+1], 2);
-		 * System.out.println("Mag: " + mag); System.out.println("db: " + (10 *
-		 * Math.log10((Math.abs(mag)))));
-		 */
-		// System.out.println("Values: " + adata[x]);
-		// }
-
 		// Initialize instance for onset detection
-		OnsetDetection od = new OnsetDetection(1024);
+		OnsetDetection od = new OnsetDetection(16384);
 		PCP p = new PCP();
 
 		// Read the audio file
 		WaveDecoder decoder = null;
 		try {
-			decoder = new WaveDecoder(new FileInputStream("/Users/christian/Music/sin196.wav"));
+			decoder = new WaveDecoder(new FileInputStream("/Users/christian/Music/e1.wav"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -91,14 +72,14 @@ public class NoteDown {
 		// Read samples from audio file
 		while (decoder.readSamples(samples) > 0) {
 			// Store untouched samples
-			//originalAudioSamples.add(samples);
+			System.arraycopy(samples, 0, tmpSamples, 0, samples.length);
+			originalAudioSamples.add(tmpSamples);
 			
 			// Perform FFT
 			fft.forward(samples);
 			originalAudioSamples.add(samples);
 			// Calculate the spectrum flux for the given sample
-			od.setAudioData(samples);			
-			p.createProfile(fft, 16384);
+			od.setAudioData(samples);						
 			
 			od.calculateSpectrumFlux(fft.getSpectrum());		
 			//System.out.println(count + " Power: " + fft.getFreq(87));
@@ -117,7 +98,7 @@ public class NoteDown {
 		MusicAnalyser ma = new MusicAnalyser();
 		FFT fft2 = new FFT(16384, 44100);
 		fft2.window(FFT.HAMMING);
-		
+		System.out.println("Peak size: " + peaks.size());
 		for (int x = 0; x < peaks.size(); x++) {
 			System.out.println("Start: " + peaks.get(x).getStartTime());
 			System.out.println("Start index: " + od.getIndex(peaks.get(x).getStartTime()));
@@ -130,8 +111,12 @@ public class NoteDown {
 			for(int z = startIndex; z <= endIndex; z++){							
 				fft2.forward(originalAudioSamples.get(z));		
 				//System.out.println("Pow: " + fft2.getBand(2));
-				//ma.getNotesInSignal(fft2);
-			}					
+				ma.getNotesInSignal(fft2);
+				//System.out.println("z: " + z);
+				//p.createProfile(fft2, 16384);
+				System.out.println("max: " + ma.getMaxFrequencys().size());
+				System.out.println("name: " + ma.getNameOfNote(82.4069f));
+			}				
 		}
 	}
 }

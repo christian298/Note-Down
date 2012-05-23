@@ -7,20 +7,21 @@ import java.util.Vector;
 public class PCP {
 	
 	private FFT fft;
-	
+	private int samplingRate;
 	// Log base 2
 	public static float lb( float x ){ 
 	  return (float) (Math.log( x ) / Math.log( 2.0f )); 
 	}
 	
 	public void createProfile(FFT f, int samplinRate){	
+		this.samplingRate = samplinRate;
 		this.fft = f;
 		int bins = samplinRate / 2 + 1;
 		float[] p = new float[bins];		
-		float[] pcp = new float[12];
-		//Point range = new Point();
+		float[] pcp = new float[24];
 		Vector<Point> range = new Vector<Point>();
 		
+		// Initialize array with values
 		for(int i = 0; i < pcp.length; i++){
 			pcp[i] = 0;
 		}
@@ -29,35 +30,39 @@ public class PCP {
 		for(int s = 0; s < b.length - 1; s++){
 			if(s == 0){
 				if(b[s] + 1 < b[s + 1]){
-					 range.add(new Point(b[s] + 1, b[s + 1]));
+					 range.add(new Point(b[s], b[s] + 1));
 				} else{
 					range.add(new Point(b[s], b[s]));
 				}		
 			} else{
 				if(b[s] + 1 < b[s + 1]){					
-					int start = b[s] - range.lastElement().y;
-					range.add(new Point(start, b[s + 1]));
+					int start = b[s] - range.lastElement().y - 1;
+					range.add(new Point(b[s] - start, b[s] + 1));
 				} else{
-					int start = b[s] - range.lastElement().y;
-					range.add(new Point(start, b[s]));
+					int start = b[s] - range.lastElement().y - 1;
+					range.add(new Point(b[s], b[s]));
 				}
 			}
 		}
 		
 		for(int v = 0; v < range.size(); v++){
-			System.out.println("X: " + range.get(v).x);
-			System.out.println("Y: " + range.get(v).y);
+			float amp = 0;
+			for(int r = range.get(v).x; r <= range.get(v).y; r++){
+				int numberBins = range.get(v).y - range.get(v).x;
+				amp += f.getBand(r) / numberBins;
+			}
+			System.out.println( v + " Amp: " + amp);
+			pcp[v] = amp;
 		}
 		
-		/*for(int b = 0; b < bins; b++){
-			System.out.println("Band: " + f.getBand(b));			
-		}*/
 		
-		for(int k = 0; k < 513; k++){
+		for(int k = 0; k < pcp.length; k++){
 			//if(k == 0){
 				//p[k] = -1;
 			//} else{
-				p[k] = Math.abs(Math.round((12f * lb(((43f / 65.4f))) % 12)));
+				//p[k] = Math.abs(Math.round((12f * lb(((43f / 65.4f))) % 12)));
+				//double dist = 2 * Math.abs((12*Math.log(pcp[k]/440f) / Math.log(2)) - 12 * Math.log(110f / 440f) / Math.log(2));
+				//System.out.println("Dist: " + dist);
 			//}
 			//System.out.println("p: " + p[k]);
 		}	
@@ -95,16 +100,55 @@ public class PCP {
 	}
 	
 	private int[] getBandsForNotes(){
-		int[] bands = new int[12];
-		for(int n = 0; n < 12; n++){
-			bands[n] = this.fft.freqToIndex(this.calculateFrequencyOfNote(2, n));
+		int[] bands = new int[24];
+		for(int o = 2; o <= 3; o++){
+			for(int n = 0; n < 12; n++){
+				bands[n] = this.fft.freqToIndex(this.calculateFrequencyOfNote(o, n));
+			}
 		}
 		return bands;
 	}
 	
 	private float calculateFrequencyOfNote(int octave, int note){
-    	float freq = (float) (Math.pow(2, ((note - 9) / 12 + octave - 4)) * 440);
+    	float freq = (float) (Math.pow(2, ((note - 9f) / 12f + octave - 4f)) * 440f);
+    	System.out.println("note: " + freq);
     	return freq;
     }
+	
+	private String getNoteName(float freq){
+		for(int i = 0; 0 < 12; i++){
+			if(freq % this.calculateFrequencyOfNote(2, i) == 0){
+				if(i == 0){
+					return "C";
+				} else if(i == 1){
+					return "C#";
+				} else if(i == 2){
+					return "D";
+				} else if(i == 3){
+					return "D#";
+				} else if(i == 4){
+					return "E";
+				} else if(i == 5){
+					return "F";
+				} else if(i == 6){
+					return "F#";
+				} else if(i == 7){
+					return "G";
+				} else if(i == 8){
+					return "G#";
+				} else if(i == 9){
+					return "A";
+				} else if(i == 10){
+					return "A#";
+				} else if(i == 11){
+					return "H";
+				}
+			}
+		}
+	}
+	
+	private void calculateRegions(){
+		
+	}
 
 }
