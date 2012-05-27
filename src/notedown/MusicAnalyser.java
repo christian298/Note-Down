@@ -13,13 +13,14 @@ import com.sun.org.apache.bcel.internal.generic.NEW;
 import dsp.FFT;
 
 public class MusicAnalyser {
-    private Map<String, Number> fretboard = new HashMap<String, Number>();
     private ArrayList<Float> ampList = new ArrayList<Float>();
     private Map<Float, Float> notes = new HashMap<Float, Float>();
     private Set<Float> maxFreq = new HashSet<Float>();
-
+    private boolean chordPlayed;
+    private int sameFrequencyCount;
+    
     public MusicAnalyser(){
-    	this.fillFretboardMap();
+    	this.chordPlayed = false;
     }
     
 	public void getNotesInSignal(FFT f){
@@ -28,7 +29,7 @@ public class MusicAnalyser {
 			// Notes 0 to 11
 			for(int n = 0; n <= 11; n++){
 				float amp = f.getFreq(this.calculateFrequencyOfNote(o, n));
-				if(amp > 1.00){
+				if(amp > 0.00){
 					//System.out.println("Amp: " + amp);
 					this.notes.put(amp, this.calculateFrequencyOfNote(o, n));
 				}
@@ -43,41 +44,23 @@ public class MusicAnalyser {
 	private void findMaxAmplitude(){
 		float tmpAmpl = 0;
 		float tmpNote = 0;
+		this.sameFrequencyCount = 0;
 		Iterator it = this.notes.entrySet().iterator();
 	    while (it.hasNext()) {
 	        Map.Entry pairs = (Map.Entry)it.next();
 	        if((float)pairs.getKey() > tmpAmpl){
 	        	tmpAmpl = (float)pairs.getKey();
 	        	tmpNote = (float)pairs.getValue();
-	        }	        
+	        	if(tmpAmpl == (float)pairs.getKey()){
+	        		this.sameFrequencyCount++;
+	        	}
+	        }	        	        
 	        System.out.println("Amp: " + tmpAmpl + " Note: " + tmpNote);
 	        maxFreq.add(tmpNote);
 	    }	    	    
 	}
 	
-    private void fillFretboardMap(){
-    	this.fretboard.put("E0", 82.41f);
-    	this.fretboard.put("E1", 87.31f);
-    	this.fretboard.put("E2", 92.50f);
-    	this.fretboard.put("E3", 98.00f);
-    	this.fretboard.put("E4", 103.80f);
-    	this.fretboard.put("E5", 110.00f);
-    	this.fretboard.put("E6", 116.5f);
-    	this.fretboard.put("E7", 123.50f);
-    	this.fretboard.put("E7", 123.50f);
-    	this.fretboard.put("E8", 130.80f);
-    	this.fretboard.put("A0", 110.00f);
-    	this.fretboard.put("A1", 116.50f);
-    	this.fretboard.put("A2", 123.50f);
-    	this.fretboard.put("D0", 146.80f);
-    	this.fretboard.put("D1", 155.60f);
-    	this.fretboard.put("D2", 164.80f);
-    	this.fretboard.put("G0", 196.00f);
-    	this.fretboard.put("G1", 207.60f);
-    	this.fretboard.put("G2", 220.00f);
-    	this.fretboard.put("secE5", 440.00f);
-    }
-    
+   
     /**
      * Calculate the frequency for an given note.
      * 0 = C
@@ -135,5 +118,75 @@ public class MusicAnalyser {
 				}
 			}
 		}
+    }
+    
+    public float[] autoCorrelate(float[] signal,int windowlength, int windowshift) {
+        int signallenth = signal.length;
+        if (signallenth < windowlength+windowshift)
+            return null;
+        float[] autocorrelation = new float[windowlength];
+        // loop over the magnitude of the autocorrelation
+        for (int lag=0;lag<windowlength;lag++) {
+            // loop over the sum
+            for (int n=0;n<windowshift;n++) {
+                autocorrelation[lag]+=signal[n]*signal[n+lag];
+            }
+        }
+        return autocorrelation;
+    }
+    
+    public boolean wasChordPlayed(){
+    	if(this.sameFrequencyCount > 3){
+    		this.chordPlayed = false;
+    	} else{
+    		this.chordPlayed = true;
+    	}
+    	return this.chordPlayed;
+    }
+    
+    public short[] getChord(){   
+    	Vector<Integer> tmp = new Vector<Integer>();
+    	Iterator<Float> it = this.maxFreq.iterator();    	
+    	int start = this.maxFreq.size() - 3;
+    	int counter = 0;
+    	short[] chord = new short[12];
+    	System.out.println("size: " + this.maxFreq.size());
+	    while (it.hasNext()) {
+	    	System.out.println("next: " + this.getNoteIndex(it.next()));
+	    }
+	    
+	    for(int i = 0; i < chord.length; i++){
+	    	if(tmp.contains(i)){
+	    		chord[i] = 1;
+	    	} else {
+	    		chord[i] = 0;
+	    	}
+	    }
+	    
+	    return chord;
+	    
+    }
+    
+    private int getNoteIndex(float f){
+    	int index = 0; 
+    	int rest = 0;
+    	int tmp = (int)f % (int)this.calculateFrequencyOfNote(2, 0);
+    	for(int i = 0; i < 12; i++){
+    		rest = (int)f % (int)this.calculateFrequencyOfNote(2, i);
+    		//System.out.println("rest: " + rest);
+			if( rest == 0){
+				index =  i;
+			} else{
+				for(int x = 0; x < 12; x++){
+					// Search nearest frequency
+					int r = (int)f % (int)this.calculateFrequencyOfNote(2, x);
+					if(r < tmp){
+						tmp = r;
+						index = x;
+					}
+				}
+			}
+		}
+    	return index;
     }
 }

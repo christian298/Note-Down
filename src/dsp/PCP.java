@@ -18,22 +18,25 @@ public class PCP {
 		this.fft = f;
 		int bins = samplinRate / 2 + 1;
 		float[] p = new float[bins];		
-		float[] pcp = new float[24];
+		float[] pcp = new float[12];
 		Vector<Point> range = new Vector<Point>();
 		
 		// Initialize array with values
 		for(int i = 0; i < pcp.length; i++){
-			pcp[i] = 0;
+			pcp[i] = 0f;
 		}
 		
 		int[] b = this.getBandsForNotes();
-		for(int s = 0; s < b.length - 1; s++){
+		for(int s = 0; s < b.length; s++){
 			if(s == 0){
 				if(b[s] + 1 < b[s + 1]){
 					 range.add(new Point(b[s], b[s] + 1));
 				} else{
 					range.add(new Point(b[s], b[s]));
 				}		
+			} else if(s == 11){
+				int start = b[s] - range.lastElement().y - 1;
+				range.add(new Point(b[s] - start, b[s] + 1));
 			} else{
 				if(b[s] + 1 < b[s + 1]){					
 					int start = b[s] - range.lastElement().y - 1;
@@ -45,27 +48,19 @@ public class PCP {
 			}
 		}
 		
+		System.out.println("L: " + range.size());
+
 		for(int v = 0; v < range.size(); v++){
-			float amp = 0;
-			for(int r = range.get(v).x; r <= range.get(v).y; r++){
-				int numberBins = range.get(v).y - range.get(v).x;
-				amp += f.getBand(r) / numberBins;
+			float amp = 0f;
+			float numberBins = (float)(range.get(v).y - range.get(v).x);
+			for(int r = range.get(v).x; r <= range.get(v).y; r++){				
+				amp += f.getBand(r);
+				//amp += 12 * lb(f.getBand(r) / 513 * 44100f/65.4f ) % 12;
 			}
+			amp = amp / numberBins;
 			System.out.println( v + " Amp: " + amp);
 			pcp[v] = amp;
 		}
-		
-		
-		for(int k = 0; k < pcp.length; k++){
-			//if(k == 0){
-				//p[k] = -1;
-			//} else{
-				//p[k] = Math.abs(Math.round((12f * lb(((43f / 65.4f))) % 12)));
-				//double dist = 2 * Math.abs((12*Math.log(pcp[k]/440f) / Math.log(2)) - 12 * Math.log(110f / 440f) / Math.log(2));
-				//System.out.println("Dist: " + dist);
-			//}
-			//System.out.println("p: " + p[k]);
-		}	
 		
 		for(int x = 0; x < p.length; x++){		
 			if(p[x] == 0f){
@@ -100,18 +95,19 @@ public class PCP {
 	}
 	
 	private int[] getBandsForNotes(){
-		int[] bands = new int[24];
-		for(int o = 2; o <= 3; o++){
-			for(int n = 0; n < 12; n++){
-				bands[n] = this.fft.freqToIndex(this.calculateFrequencyOfNote(o, n));
+		int[] bands = new int[12];
+		int bandCount = 0;
+		for(int o = 2; o <= 2; o++){
+			for(int n = 0; n < 12; n++){				
+				bands[bandCount] = this.fft.freqToIndex(this.calculateFrequencyOfNote(o, n));
+				bandCount++;
 			}
 		}
 		return bands;
 	}
 	
 	private float calculateFrequencyOfNote(int octave, int note){
-    	float freq = (float) (Math.pow(2, ((note - 9f) / 12f + octave - 4f)) * 440f);
-    	System.out.println("note: " + freq);
+    	float freq = (float) (Math.pow(2, ((note - 9f) / 12f + octave - 4f)) * 440f);    	
     	return freq;
     }
 	
