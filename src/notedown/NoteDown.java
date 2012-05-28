@@ -135,11 +135,12 @@ public class NoteDown {
 	    	last = (float) it.next();
 	        System.out.println("Max: " + last);	        
 	    }
-	    
+	    Similarity s = new Similarity();
 	    // Find Chords/Notes
 	    if(ma.wasChordPlayed()){
 	    	for(int c = 0; c < ma.getChord().length; c++){
-	    		System.out.print(" " + ma.getChord()[c]);
+	    		//System.out.print(" " + ma.getChord()[c]);
+	    		s.cosineSimilarity(ma.getChord());
 	    	}
 	    } else{
 	    	System.out.println("Note: " + ma.getNameOfNote(last));

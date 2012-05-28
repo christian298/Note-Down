@@ -18,6 +18,7 @@ public class MusicAnalyser {
     private Set<Float> maxFreq = new HashSet<Float>();
     private boolean chordPlayed;
     private int sameFrequencyCount;
+    private short[] chordVec; 
     
     public MusicAnalyser(){
     	this.chordPlayed = false;
@@ -150,9 +151,9 @@ public class MusicAnalyser {
     	int start = this.maxFreq.size() - 3;
     	int counter = 0;
     	short[] chord = new short[12];
-    	System.out.println("size: " + this.maxFreq.size());
+    	//System.out.println("size: " + this.maxFreq.size());
 	    while (it.hasNext()) {
-	    	System.out.println("next: " + this.getNoteIndex(it.next()));
+	    	tmp.add(this.getNoteIndex(it.next()));
 	    }
 	    
 	    for(int i = 0; i < chord.length; i++){
