@@ -30,7 +30,7 @@ public class MusicAnalyser {
 			// Notes 0 to 11
 			for(int n = 0; n <= 11; n++){
 				float amp = f.getFreq(this.calculateFrequencyOfNote(o, n));
-				if(amp > 0.00){
+				if(amp > 1.00){
 					//System.out.println("Amp: " + amp);
 					this.notes.put(amp, this.calculateFrequencyOfNote(o, n));
 				}

@@ -55,7 +55,7 @@ public class PCP {
 			float numberBins = (float)(range.get(v).y - range.get(v).x);
 			for(int r = range.get(v).x; r <= range.get(v).y; r++){				
 				amp += f.getBand(r);
-				//amp += 12 * lb(f.getBand(r) / 513 * 44100f/65.4f ) % 12;
+				//amp += 12 * lb(f.getBand(r) / 513f * 44100f/220f );
 			}
 			amp = amp / numberBins;
 			System.out.println( v + " Amp: " + amp);

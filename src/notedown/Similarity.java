@@ -30,11 +30,21 @@ public class Similarity {
 	}
 	
 	private void fillChordTemplates(){
-		short[] c = {1,0,0,0,0,1,0,1,0,0,0,0};
-		short[] d = {0,0,1,0,0,0,0,1,0,1,0,0};
+		short[] c = {1,0,0,0,1,0,0,1,0,0,0,0};
+		short[] d = {0,0,1,0,0,0,0,0,0,1,0,0};
+		short[] e = {0,0,0,0,1,0,0,0,0,0,0,1};
+		short[] f = {1,0,0,0,0,1,0,0,0,1,0,0};
+		short[] g = {0,0,1,0,0,0,0,1,0,0,0,1};
+		short[] a = {0,0,0,0,1,0,0,0,0,1,0,0};
+		short[] h = {0,0,0,0,0,0,0,0,0,0,0,1};
 		
 		this.chordTemplates.add(new Chord(c));
 		this.chordTemplates.add(new Chord(d));
+		this.chordTemplates.add(new Chord(e));
+		this.chordTemplates.add(new Chord(f));
+		this.chordTemplates.add(new Chord(g));
+		this.chordTemplates.add(new Chord(a));
+		this.chordTemplates.add(new Chord(h));
 		
 	}
 

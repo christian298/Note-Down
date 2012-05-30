@@ -24,6 +24,7 @@ public class NoteDown {
 
 	public static void main(String[] args) {
 		int sampleSize = 16384;
+		int samplingRate = 44100;
 		float[] samples = new float[sampleSize];
 		float[] tmpSamples = new float[sampleSize];
 		ArrayList<float[]> originalAudioSamples = new ArrayList<float[]>();		
@@ -63,7 +64,7 @@ public class NoteDown {
 		// Read the audio file
 		WaveDecoder decoder = null;
 		try {
-			decoder = new WaveDecoder(new FileInputStream("/Users/christian/Music/a.wav"));
+			decoder = new WaveDecoder(new FileInputStream("/Users/christian/Music/chord_c.wav"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -71,7 +72,7 @@ public class NoteDown {
 		}
 		
 		// Initialize an fft instance 
-		FFT fft = new FFT(sampleSize, 44100);
+		FFT fft = new FFT(sampleSize, samplingRate);
 		MusicAnalyser ma = new MusicAnalyser();
 
 		// Use Hamming-window for the signal
@@ -103,7 +104,7 @@ public class NoteDown {
 		int endIndex = 0;
 		
 		
-		FFT fft2 = new FFT(sampleSize, 44100);
+		FFT fft2 = new FFT(sampleSize, samplingRate);
 		fft2.window(FFT.HAMMING);
 		System.out.println("Peak size: " + peaks.size());
 		
@@ -116,18 +117,12 @@ public class NoteDown {
 			System.out.println("End index: " + od.getIndex(peaks.get(x).getEndTime()));
 			endIndex = od.getIndex(peaks.get(x).getEndTime());
 			
-			for(int z = startIndex; z <= endIndex; z++){							
-				
-				fft2.forward(originalAudioSamples.get(z));		
-				//System.out.println("Pow: " + fft2.getBand(2));
+			for(int z = startIndex; z <= endIndex; z++){											
+				fft2.forward(originalAudioSamples.get(z));						
 				ma.getNotesInSignal(fft2);
-				//System.out.println("z: " + z);
 				p.createProfile(fft2, sampleSize);
-				//System.out.println("max: " + ma.getMaxFrequencys().size());
-				//System.out.println("name: " + ma.getNameOfNote(82.4069f));
 			}				
 		}
-		
 		
 		Iterator it = ma.getMaxFrequencys().iterator();
 		float last = 0f;
@@ -137,14 +132,14 @@ public class NoteDown {
 	    }
 	    Similarity s = new Similarity();
 	    // Find Chords/Notes
-	    if(ma.wasChordPlayed()){
+	    //if(ma.wasChordPlayed()){
 	    	for(int c = 0; c < ma.getChord().length; c++){
 	    		//System.out.print(" " + ma.getChord()[c]);
 	    		s.cosineSimilarity(ma.getChord());
 	    	}
-	    } else{
-	    	System.out.println("Note: " + ma.getNameOfNote(last));
-	    }
+	    //} else{
+	    //	System.out.println("Note: " + ma.getNameOfNote(last));
+	    //}
 	    
 	    
 		try {
