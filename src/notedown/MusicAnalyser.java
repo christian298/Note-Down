@@ -31,7 +31,6 @@ public class MusicAnalyser {
 			for(int n = 0; n <= 11; n++){
 				float amp = f.getFreq(this.calculateFrequencyOfNote(o, n));
 				if(amp > 1.00){
-					//System.out.println("Amp: " + amp);
 					this.notes.put(amp, this.calculateFrequencyOfNote(o, n));
 				}
 			}
@@ -137,7 +136,7 @@ public class MusicAnalyser {
     }
     
     public boolean wasChordPlayed(){
-    	if(this.sameFrequencyCount > 3){
+    	if(this.maxFreq.size() <= 1){
     		this.chordPlayed = false;
     	} else{
     		this.chordPlayed = true;
@@ -151,8 +150,8 @@ public class MusicAnalyser {
     	int start = this.maxFreq.size() - 3;
     	int counter = 0;
     	short[] chord = new short[12];
-    	//System.out.println("size: " + this.maxFreq.size());
-	    while (it.hasNext()) {
+
+    	while (it.hasNext()) {
 	    	tmp.add(this.getNoteIndex(it.next()));
 	    }
 	    

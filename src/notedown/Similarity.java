@@ -3,30 +3,48 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import music_notation.Chord;
-
+/**
+ * Computes the similarity between a detected chord and the template chords
+ * @author christian
+ *
+ */
 public class Similarity {
 	private Vector<Chord> chordTemplates;
+	private Chord highestSimilarity;
 	
 	public Similarity(){
 		this.chordTemplates = new Vector<Chord>();
 		this.fillChordTemplates();
 	}
 	
+	/**
+	 * Find a matching Template for the detected Chord
+	 * @param detectedChord The detected Chord
+	 */
 	public void cosineSimilarity(short[] detectedChord){
+		float tmpCos = 0;
+		Chord chord;
+		Chord tmpChord = null;
 		Iterator<Chord> it = chordTemplates.iterator();
+		
 		while(it.hasNext()){
-			short[] tmpChord = it.next().getChordVector();
+			chord = it.next();
+			short[] tmpChordVec = chord.getChordVector();
 			int eukl = 0;
 			int aSum = 0;
 			int bSum = 0;
 			for(int i = 0; i < 12; i++){
-				eukl += tmpChord[i] * detectedChord[i];
-				aSum += Math.pow(tmpChord[i], 2);
+				eukl += tmpChordVec[i] * detectedChord[i];
+				aSum += Math.pow(tmpChordVec[i], 2);
 				bSum += Math.pow(detectedChord[i], 2);
 			}
 			float cos = (float) (eukl / (Math.sqrt(aSum) * Math.sqrt(bSum)));
-			System.out.println("Cos Sim: " + cos);
+			if(cos > tmpCos){
+				tmpCos = cos;
+				tmpChord = chord;
+			}
 		}
+		this.highestSimilarity = tmpChord;
 	}
 	
 	private void fillChordTemplates(){
@@ -38,14 +56,18 @@ public class Similarity {
 		short[] a = {0,0,0,0,1,0,0,0,0,1,0,0};
 		short[] h = {0,0,0,0,0,0,0,0,0,0,0,1};
 		
-		this.chordTemplates.add(new Chord(c));
-		this.chordTemplates.add(new Chord(d));
-		this.chordTemplates.add(new Chord(e));
-		this.chordTemplates.add(new Chord(f));
-		this.chordTemplates.add(new Chord(g));
-		this.chordTemplates.add(new Chord(a));
-		this.chordTemplates.add(new Chord(h));
+		this.chordTemplates.add(new Chord(c, "C"));
+		this.chordTemplates.add(new Chord(d, "D"));
+		this.chordTemplates.add(new Chord(e, "E"));
+		this.chordTemplates.add(new Chord(f, "F"));
+		this.chordTemplates.add(new Chord(g, "G"));
+		this.chordTemplates.add(new Chord(a, "A"));
+		this.chordTemplates.add(new Chord(h, "H"));
 		
 	}
-
+	
+	public Chord getChordWithHighestSimilarity(){
+		return this.highestSimilarity;
+	}
+	
 }

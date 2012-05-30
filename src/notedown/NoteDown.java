@@ -64,7 +64,7 @@ public class NoteDown {
 		// Read the audio file
 		WaveDecoder decoder = null;
 		try {
-			decoder = new WaveDecoder(new FileInputStream("/Users/christian/Music/chord_c.wav"));
+			decoder = new WaveDecoder(new FileInputStream("/Users/christian/Music/e1.wav"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -126,20 +126,20 @@ public class NoteDown {
 		
 		Iterator it = ma.getMaxFrequencys().iterator();
 		float last = 0f;
+		System.out.println("size maxfreq: " + ma.getMaxFrequencys().size());
 	    while (it.hasNext()) {
-	    	last = (float) it.next();
-	        System.out.println("Max: " + last);	        
+	    	last = (float) it.next();	        
 	    }
 	    Similarity s = new Similarity();
+	    
 	    // Find Chords/Notes
-	    //if(ma.wasChordPlayed()){
-	    	for(int c = 0; c < ma.getChord().length; c++){
-	    		//System.out.print(" " + ma.getChord()[c]);
+	    if(ma.wasChordPlayed()){
+	    	for(int c = 0; c < ma.getChord().length; c++){	    	
 	    		s.cosineSimilarity(ma.getChord());
 	    	}
-	    //} else{
-	    //	System.out.println("Note: " + ma.getNameOfNote(last));
-	    //}
+	    } else{
+	    	System.out.println("Note: " + ma.getNameOfNote(last));
+	    }
 	    
 	    
 		try {
