@@ -144,8 +144,8 @@ public class NoteDown {
 	    
 		try {
 			MusicXML xml = new MusicXML();
-			xml.writeNote("3", "5");
-			xml.finalize();
+			//xml.writeNote("3", "5");
+			//xml.finalize();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (XMLStreamException e) {
