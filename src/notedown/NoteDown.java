@@ -141,18 +141,7 @@ public class NoteDown {
 	    	System.out.println("Note: " + ma.getNameOfNote(last));
 	    }
 	    
-	    
-		try {
-			MusicXML xml = new MusicXML();
-			//xml.writeNote("3", "5");
-			//xml.finalize();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (XMLStreamException e) {
-			e.printStackTrace();
-		} catch (FactoryConfigurationError e) {			
-			e.printStackTrace();
-		}
+	    MusicXML xml = new MusicXML();
 		
 	}
 }
