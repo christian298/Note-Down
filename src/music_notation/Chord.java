@@ -20,4 +20,8 @@ public class Chord {
 	public String getChordName(){
 		return this.name;
 	}
+	
+	public void musicXMLFormat(){
+		// transform to musicxml friendly format
+	}
 }

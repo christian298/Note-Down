@@ -5,8 +5,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
+
+import music_notation.Note;
 
 import com.sun.org.apache.bcel.internal.generic.NEW;
 
@@ -15,51 +18,131 @@ import dsp.FFT;
 public class MusicAnalyser {
     private ArrayList<Float> ampList = new ArrayList<Float>();
     private Map<Float, Float> notes = new HashMap<Float, Float>();
+    private Vector<Note> noteStore = new Vector<Note>();
     private Set<Float> maxFreq = new HashSet<Float>();
     private boolean chordPlayed;
     private int sameFrequencyCount;
     private short[] chordVec; 
-    
+    private float amplitudeThreshold;
+    private float[] spectrum;
     public MusicAnalyser(){
     	this.chordPlayed = false;
+    	this.amplitudeThreshold = 2f;
     }
     
+    /**
+     * Calculates the amplitude for all 12 notes
+     * @param f The fft instance
+     */
 	public void getNotesInSignal(FFT f){
 		// Octave 2 to 5
 		for(int o = 2; o <= 5; o++){
 			// Notes 0 to 11
 			for(int n = 0; n <= 11; n++){
-				float amp = f.getFreq(this.calculateFrequencyOfNote(o, n));
-				if(amp > 1.00){
-					this.notes.put(amp, this.calculateFrequencyOfNote(o, n));
+				// Get frequency of every note
+				float freq = this.calculateFrequencyOfNote(o, n);
+				// Amplitude for note
+				float amp = f.getFreq(freq);
+
+				// Get only notes with amplitudes over the given threshold
+				if(amp > this.amplitudeThreshold){
+					//this.notes.put(amp, this.calculateFrequencyOfNote(o, n));
+					this.notes.put(freq, amp);
+					if(this.storeNote(freq, amp)){
+						this.noteStore.add(new Note(freq, amp));
+					}
 				}
 			}
 		}
 		this.findMaxAmplitude();
+		//this.maxAmp();
 	}
 	
+	public void getNotesInSignal(float[] spec){
+		this.spectrum = spec;
+		// Octave 2 to 5
+		for(int o = 2; o <= 5; o++){
+			// Notes 0 to 11
+			for(int n = 0; n <= 11; n++){
+				// Get frequency of every note
+				float freq = this.calculateFrequencyOfNote(o, n);
+				// Amplitude for note
+				float amp = this.getFreq(freq);
+
+				// Get only notes with amplitudes over the given threshold
+				if(amp > this.amplitudeThreshold){
+					//this.notes.put(amp, this.calculateFrequencyOfNote(o, n));
+					this.notes.put(freq, amp);
+					if(this.storeNote(freq, amp)){
+						this.noteStore.add(new Note(freq, amp));
+					}
+				}
+			}
+		}
+		this.findMaxAmplitude();
+		//this.maxAmp();
+	}
+	
+	public int freqToIndex(float freq){
+	    float fraction = freq / (float) 44100f;
+	    int i = Math.round(16384 * fraction);
+	    return i;
+	  }
+	 public float getFreq(float freq)
+	  {
+	    return getBand(freqToIndex(freq));
+	  }
+	 public float getBand(int i)
+	  {
+	    if (i < 0) i = 0;
+	    if (i > this.spectrum.length - 1) i = this.spectrum.length - 1;
+	    return this.spectrum[i];
+	  }
+		
 	/**
 	 * Find the frequency with max. amplitude
 	 */
 	private void findMaxAmplitude(){
 		float tmpAmpl = 0;
 		float tmpNote = 0;
-		this.sameFrequencyCount = 0;
-		Iterator it = this.notes.entrySet().iterator();
+		Iterator<Entry<Float, Float>> it = this.notes.entrySet().iterator();
 	    while (it.hasNext()) {
-	        Map.Entry pairs = (Map.Entry)it.next();
-	        if((float)pairs.getKey() > tmpAmpl){
-	        	tmpAmpl = (float)pairs.getKey();
-	        	tmpNote = (float)pairs.getValue();
-	        	if(tmpAmpl == (float)pairs.getKey()){
-	        		this.sameFrequencyCount++;
-	        	}
+	        Entry<Float, Float> pairs = it.next();
+	        if((float)pairs.getValue() > tmpAmpl){
+	        	//tmpAmpl = (float)pairs.getKey();
+	        	//tmpNote = (float)pairs.getValue();
+	        	tmpAmpl = (float)pairs.getValue();
+	        	tmpNote = (float)pairs.getKey();
 	        }	        	        
 	        System.out.println("Amp: " + tmpAmpl + " Note: " + tmpNote);
 	        maxFreq.add(tmpNote);
 	    }	    	    
 	}
 	
+	private void maxAmp(){
+		Iterator<Note> it = this.noteStore.iterator();
+		while(it.hasNext()){
+			Note n = it.next();
+			System.out.println("F: " + n.getFrequency() + "A: " + n.getAmplitude());
+		}
+	}
+	
+	private boolean storeNote(float f, float a){
+		boolean saveTheNote = true;
+		Iterator<Note> noteIt = this.noteStore.iterator();		
+		while(noteIt.hasNext()){
+			Note n = noteIt.next();
+			if(n.getFrequency() == f){
+				if(n.getAmplitude() < a){
+					saveTheNote = true;
+					noteIt.remove();
+				} else{
+					saveTheNote = false;
+				}
+			}
+		}
+		return saveTheNote;
+	}
    
     /**
      * Calculate the frequency for an given note.
@@ -80,7 +163,7 @@ public class MusicAnalyser {
      * @return Returns the frequency of an note as float
      */
     public float calculateFrequencyOfNote(int octave, int note){
-    	float freq = (float) (Math.pow(2, ((note - 9f) / 12f + octave - 4f)) * 440f);
+    	float freq = (float) (Math.pow(2f, ((note - 9f) / 12f + octave - 4f)) * 440f);
     	return freq;
     }
     
@@ -188,5 +271,9 @@ public class MusicAnalyser {
 			}
 		}
     	return index;
+    }
+    
+    public Vector<Note> getNoteStoreage(){
+    	return this.noteStore;
     }
 }

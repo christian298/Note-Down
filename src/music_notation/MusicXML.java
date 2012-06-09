@@ -57,10 +57,24 @@ public class MusicXML {
 		Element key = new Element("key");
 		Element fifths = new Element("fifths");
 		fifths.addContent(new Text("0"));
+		Element mode = new Element("mode");
+		mode.addContent(new Text("major"));
 		key.addContent(fifths);
+		key.addContent(mode);
 		
 		attributes.addContent(divison);
 		attributes.addContent(key);
+		
+		Element clef = new Element("clef");
+		Element sign = new Element("sign");
+		sign.addContent(new Text("TAB"));
+		Element line = new Element("line");
+		line.addContent(new Text("5"));
+		clef.addContent(sign);
+		clef.addContent(line);
+		
+		attributes.addContent(clef);
+		this.setTuning(attributes);
 		measure.addContent(attributes);
 		
 		// Create note attribute
@@ -68,9 +82,9 @@ public class MusicXML {
 		
 		Element pitch = new Element("pitch");
 		Element step = new Element("step");
-		step.addContent(new Text("E"));
+		step.addContent(new Text("C"));
 		Element octave = new Element("octave");
-		octave.addContent(new Text("2"));
+		octave.addContent(new Text("4"));
 		pitch.addContent(step);
 		pitch.addContent(octave);
 		
@@ -81,7 +95,7 @@ public class MusicXML {
 		note.addContent(duration);
 		
 		Element type = new Element("type");
-		type.addContent(new Text("whole"));
+		type.addContent(new Text("quarter"));
 		note.addContent(type);
 		
 		// Create notations attribute
@@ -146,6 +160,80 @@ public class MusicXML {
 	}
 	
 	public void writeChord(){
+		
+	}
+	
+	/**
+	 * Set tuning of the guitar via staff element
+	 * @param attr Attribute to attach the tuning settings (normally the attribute element)
+	 */
+	private void setTuning(Element attr){
+		Element staffDetails = new Element("staff-details");
+		Element staffLines = new Element("staff-lines");
+		staffLines.addContent(new Text("6"));
+		staffDetails.addContent(staffLines);
+		
+		Element staffTuning_1 = new Element("staff-tuning");
+		staffTuning_1.setAttribute("line", "1");
+		Element tuningStep_1 = new Element("tuning-step");
+		tuningStep_1.addContent(new Text("E"));
+		Element tuningOctave_1 = new Element("tuning-octave");
+		tuningOctave_1.addContent(new Text("2"));
+		staffTuning_1.addContent(tuningStep_1);
+		staffTuning_1.addContent(tuningOctave_1);
+		staffDetails.addContent(staffTuning_1);
+		
+		Element staffTuning_2 = new Element("staff-tuning");
+		staffTuning_2.setAttribute("line", "2");
+		Element tuningStep_2 = new Element("tuning-step");
+		tuningStep_2.addContent(new Text("A"));
+		Element tuningOctave_2 = new Element("tuning-octave");
+		tuningOctave_2.addContent(new Text("2"));
+		staffTuning_2.addContent(tuningStep_2);
+		staffTuning_2.addContent(tuningOctave_2);
+		staffDetails.addContent(staffTuning_2);
+		
+		Element staffTuning_3 = new Element("staff-tuning");
+		staffTuning_3.setAttribute("line", "3");
+		Element tuningStep_3 = new Element("tuning-step");
+		tuningStep_3.addContent(new Text("D"));
+		Element tuningOctave_3 = new Element("tuning-octave");
+		tuningOctave_3.addContent(new Text("3"));
+		staffTuning_3.addContent(tuningStep_3);
+		staffTuning_3.addContent(tuningOctave_3);
+		staffDetails.addContent(staffTuning_3);
+		
+		Element staffTuning_4 = new Element("staff-tuning");
+		staffTuning_4.setAttribute("line", "4");
+		Element tuningStep_4 = new Element("tuning-step");
+		tuningStep_4.addContent(new Text("G"));
+		Element tuningOctave_4 = new Element("tuning-octave");
+		tuningOctave_4.addContent(new Text("3"));
+		staffTuning_4.addContent(tuningStep_4);
+		staffTuning_4.addContent(tuningOctave_4);
+		staffDetails.addContent(staffTuning_4);
+		
+		Element staffTuning_5 = new Element("staff-tuning");
+		staffTuning_5.setAttribute("line", "5");
+		Element tuningStep_5 = new Element("tuning-step");
+		tuningStep_5.addContent(new Text("B"));
+		Element tuningOctave_5 = new Element("tuning-octave");
+		tuningOctave_5.addContent(new Text("3"));
+		staffTuning_5.addContent(tuningStep_5);
+		staffTuning_5.addContent(tuningOctave_5);
+		staffDetails.addContent(staffTuning_5);
+		
+		Element staffTuning_6 = new Element("staff-tuning");
+		staffTuning_6.setAttribute("line", "6");
+		Element tuningStep_6 = new Element("tuning-step");
+		tuningStep_6.addContent(new Text("E"));
+		Element tuningOctave_6 = new Element("tuning-octave");
+		tuningOctave_6.addContent(new Text("4"));
+		staffTuning_6.addContent(tuningStep_6);
+		staffTuning_6.addContent(tuningOctave_6);
+		staffDetails.addContent(staffTuning_6);
+		
+		attr.addContent(staffDetails);
 		
 	}
 

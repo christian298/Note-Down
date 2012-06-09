@@ -39,6 +39,7 @@ public class Similarity {
 				bSum += Math.pow(detectedChord[i], 2);
 			}
 			float cos = (float) (eukl / (Math.sqrt(aSum) * Math.sqrt(bSum)));
+			//System.out.println("cos: " + cos);
 			if(cos > tmpCos){
 				tmpCos = cos;
 				tmpChord = chord;
@@ -49,12 +50,12 @@ public class Similarity {
 	
 	private void fillChordTemplates(){
 		short[] c = {1,0,0,0,1,0,0,1,0,0,0,0};
-		short[] d = {0,0,1,0,0,0,0,0,0,1,0,0};
-		short[] e = {0,0,0,0,1,0,0,0,0,0,0,1};
+		short[] d = {0,0,1,0,0,0,1,0,0,1,0,0};
+		short[] e = {0,0,0,0,1,0,0,0,1,0,0,1};
 		short[] f = {1,0,0,0,0,1,0,0,0,1,0,0};
 		short[] g = {0,0,1,0,0,0,0,1,0,0,0,1};
-		short[] a = {0,0,0,0,1,0,0,0,0,1,0,0};
-		short[] h = {0,0,0,0,0,0,0,0,0,0,0,1};
+		short[] a = {0,1,0,0,1,0,0,0,0,1,0,0};
+		short[] h = {0,0,0,1,0,0,1,0,0,0,0,1};
 		
 		this.chordTemplates.add(new Chord(c, "C"));
 		this.chordTemplates.add(new Chord(d, "D"));
@@ -68,6 +69,13 @@ public class Similarity {
 	
 	public Chord getChordWithHighestSimilarity(){
 		return this.highestSimilarity;
+	}
+	
+	/**
+	 * Calculate the hamming distance 
+	 */
+	public void hamming(){
+		
 	}
 	
 }

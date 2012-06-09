@@ -60,7 +60,7 @@ public class OnsetDetection {
 	}
 	
 	/**
-	 * Finds the peaks in the Audiodata, based on the spectral flux. 
+	 * Finds the peaks in the audiodata, based on the spectral flux. 
 	 */
 	public void findPeaks() {
 		for (int x = 0; x < this.spectralFlux.size(); x++) {
