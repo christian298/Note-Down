@@ -1,12 +1,18 @@
 package notedown;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.Vector;
 
 import music_notation.Note;
@@ -25,6 +31,7 @@ public class MusicAnalyser {
     private short[] chordVec; 
     private float amplitudeThreshold;
     private float[] spectrum;
+    
     public MusicAnalyser(){
     	this.chordPlayed = false;
     	this.amplitudeThreshold = 2f;
@@ -47,9 +54,12 @@ public class MusicAnalyser {
 				// Get only notes with amplitudes over the given threshold
 				if(amp > this.amplitudeThreshold){
 					//this.notes.put(amp, this.calculateFrequencyOfNote(o, n));
+					String name = this.getNameOfNote(freq);
+					System.out.println("Freq: " + freq + "Amp: " + amp + " Name: " + name);
 					this.notes.put(freq, amp);
-					if(this.storeNote(freq, amp)){
-						this.noteStore.add(new Note(freq, amp));
+					
+					if(this.storeNote(freq, amp, name)){
+						this.noteStore.add(new Note(freq, amp, name));
 					}
 				}
 			}
@@ -73,8 +83,9 @@ public class MusicAnalyser {
 				if(amp > this.amplitudeThreshold){
 					//this.notes.put(amp, this.calculateFrequencyOfNote(o, n));
 					this.notes.put(freq, amp);
-					if(this.storeNote(freq, amp)){
-						this.noteStore.add(new Note(freq, amp));
+					String name = this.getNameOfNote(freq);
+					if(this.storeNote(freq, amp, name)){
+						this.noteStore.add(new Note(freq, amp, name));
 					}
 				}
 			}
@@ -87,17 +98,17 @@ public class MusicAnalyser {
 	    float fraction = freq / (float) 44100f;
 	    int i = Math.round(16384 * fraction);
 	    return i;
-	  }
-	 public float getFreq(float freq)
-	  {
+	 }
+	
+	public float getFreq(float freq){
 	    return getBand(freqToIndex(freq));
-	  }
-	 public float getBand(int i)
-	  {
+	}
+	
+	public float getBand(int i){
 	    if (i < 0) i = 0;
 	    if (i > this.spectrum.length - 1) i = this.spectrum.length - 1;
 	    return this.spectrum[i];
-	  }
+	 }
 		
 	/**
 	 * Find the frequency with max. amplitude
@@ -114,7 +125,7 @@ public class MusicAnalyser {
 	        	tmpAmpl = (float)pairs.getValue();
 	        	tmpNote = (float)pairs.getKey();
 	        }	        	        
-	        System.out.println("Amp: " + tmpAmpl + " Note: " + tmpNote);
+	        //System.out.println("Amp: " + tmpAmpl + " Note: " + tmpNote);
 	        maxFreq.add(tmpNote);
 	    }	    	    
 	}
@@ -127,12 +138,19 @@ public class MusicAnalyser {
 		}
 	}
 	
-	private boolean storeNote(float f, float a){
+	/**
+	 * Check if note should be stored. Only store a notes with higher amplitude than present
+	 * @param f Frequency
+	 * @param a Amplitude
+	 * @return true or false
+	 */
+	private boolean storeNote(float f, float a, String name){
 		boolean saveTheNote = true;
 		Iterator<Note> noteIt = this.noteStore.iterator();		
-		while(noteIt.hasNext()){
+		while(noteIt.hasNext()){			
 			Note n = noteIt.next();
-			if(n.getFrequency() == f){
+			if(n.getName() == name){
+			//if(n.getFrequency() == f){
 				if(n.getAmplitude() < a){
 					saveTheNote = true;
 					noteIt.remove();
@@ -163,7 +181,7 @@ public class MusicAnalyser {
      * @return Returns the frequency of an note as float
      */
     public float calculateFrequencyOfNote(int octave, int note){
-    	float freq = (float) (Math.pow(2f, ((note - 9f) / 12f + octave - 4f)) * 440f);
+    	float freq = (float) (Math.pow(2, ((note - 9f) / 12f + octave - 4f)) * 440f);
     	return freq;
     }
     
@@ -171,36 +189,37 @@ public class MusicAnalyser {
     	return this.maxFreq;
     }
     
-    public String getNameOfNote(float f){
-    	for(int i = 0; 0 < 12; i++){
-			if(f % this.calculateFrequencyOfNote(2, i) == 0){
-				if(i == 0){
-					return "C";
-				} else if(i == 1){
-					return "C#";
-				} else if(i == 2){
-					return "D";
-				} else if(i == 3){
-					return "D#";
-				} else if(i == 4){
-					return "E";
-				} else if(i == 5){
-					return "F";
-				} else if(i == 6){
-					return "F#";
-				} else if(i == 7){
-					return "G";
-				} else if(i == 8){
-					return "G#";
-				} else if(i == 9){
-					return "A";
-				} else if(i == 10){
-					return "A#";
-				} else if(i == 11){
-					return "H";
-				}
-			}
+    public String getNameOfNote(float f){  
+    	String name = null;
+    	int i = this.getNoteIndex(f);
+    			
+    	if(i == 0){
+			name =  "C";
+		} else if(i == 1){
+			name = "C#";
+		} else if(i == 2){
+			name = "D";
+		} else if(i == 3){
+			name = "D#";
+		} else if(i == 4){
+			name = "E";
+		} else if(i == 5){
+			name = "F";
+		} else if(i == 6){
+			name = "F#";
+		} else if(i == 7){
+			name = "G";
+		} else if(i == 8){
+			name = "G#";
+		} else if(i == 9){
+			name = "A";
+		} else if(i == 10){
+			name = "A#";
+		} else if(i == 11){
+			name = "H";
 		}
+    			
+    	return name;
     }
     
     public float[] autoCorrelate(float[] signal,int windowlength, int windowshift) {
@@ -227,6 +246,14 @@ public class MusicAnalyser {
     	return this.chordPlayed;
     }
     
+    public boolean chordPlayed(){
+    	if(this.noteStore.size() > 1){
+    		return true;
+    	} else{
+    		return false;
+    	}
+    }
+    
     public short[] getChord(){   
     	Vector<Integer> tmp = new Vector<Integer>();
     	Iterator<Float> it = this.maxFreq.iterator();    	
@@ -244,36 +271,116 @@ public class MusicAnalyser {
 	    	} else {
 	    		chord[i] = 0;
 	    	}
-	    }
-	    
+	    }   
 	    return chord;
-	    
     }
     
+    public short[] getChord2(){
+    	short[] chord = new short[12];
+    	Vector<Integer> tmp = new Vector<Integer>();
+    	Iterator<Note> it = this.noteStore.iterator();
+		int noteCount = 0;
+    	
+    	while(it.hasNext() && noteCount < 3){
+    		tmp.add(this.getNoteIndex(it.next().getFrequency()));
+    		noteCount++;
+    	}
+    	
+    	for(int i = 0; i < chord.length; i++){
+    		if(tmp.contains(i)){
+    			chord[i] = 1;
+    		} else{
+    			chord[i] = 0;
+    		}
+    	}
+    	
+    	return chord;
+    }
+    
+    /**
+     * Get the index by the frequency a note
+     * @param f Frequency
+     * @return The index of the note (for c = 0 or for d = 3)
+     */
     private int getNoteIndex(float f){
+    	Map<Integer, Float> rMap = new TreeMap<Integer, Float>();
     	int index = 0; 
-    	int rest = 0;
-    	int tmp = (int)f % (int)this.calculateFrequencyOfNote(2, 0);
+    	float tmp = f % this.calculateFrequencyOfNote(0, 0);
     	for(int i = 0; i < 12; i++){
-    		rest = (int)f % (int)this.calculateFrequencyOfNote(2, i);
-    		//System.out.println("rest: " + rest);
-			if( rest == 0){
-				index =  i;
-			} else{
-				for(int x = 0; x < 12; x++){
-					// Search nearest frequency
-					int r = (int)f % (int)this.calculateFrequencyOfNote(2, x);
-					if(r < tmp){
-						tmp = r;
-						index = x;
-					}
-				}
-			}
+        	float rest = 100;
+    		for(int o = 0; o < 5; o++){
+    			float tmpRest = f % this.calculateFrequencyOfNote(o, i);
+    			if(tmpRest < rest ){
+    				rest = tmpRest;
+    			}    			
+    		}
+    		rMap.put(i, rest);
 		}
-    	return index;
+    	
+    	return entriesSortedByValues(rMap).first().getKey();
     }
     
+    /**
+     * Sorting a map by values
+     * @param map Map to sort
+     * @return Sorted map
+     */
+    static <K,V extends Comparable<? super V>>
+    SortedSet<Map.Entry<K,V>> entriesSortedByValues(Map<K,V> map) {
+        SortedSet<Map.Entry<K,V>> sortedEntries = new TreeSet<Map.Entry<K,V>>(
+            new Comparator<Map.Entry<K,V>>() {
+                @Override public int compare(Map.Entry<K,V> e1, Map.Entry<K,V> e2) {
+                    return e1.getValue().compareTo(e2.getValue());
+                }
+            }
+        );
+        sortedEntries.addAll(map.entrySet());
+        return sortedEntries;
+    }
+    
+    
+    /**
+     * Get all recognized notes
+     * @return Vector with notes
+     */
     public Vector<Note> getNoteStoreage(){
     	return this.noteStore;
     }
+    
+    /**
+     * Deletes all entries in the note Vector
+     */
+    public void cleanNoteStorage(){
+    	this.noteStore.clear();
+    }
+    
+    /**
+     * Sorts the notes in the vector by amplitude value 
+     */
+    public void sortNoteStorage(){
+    	Collections.sort(this.noteStore, new Comparator<Note>() {
+    		   public int compare(Note o1, Note o2){
+    		      return o2.getAmplitude().compareTo(o1.getAmplitude());
+    		   }
+    	});
+   }   
+   
+   public void removeSameNotes(){
+	   Iterator<Note> it1 = this.noteStore.iterator();
+	   Iterator<Note> it2 = this.noteStore.iterator();
+	   while(it1.hasNext()){
+		   Note n1 = it1.next();
+		   it2.next();
+		   while(it2.hasNext()){
+			   Note n2 = it2.next();
+			   if(n2.getFrequency() % n1.getFrequency() == 0){
+				   if(n2.getAmplitude() > n1.getAmplitude()){
+					   it1.remove();
+				   } else{
+					   it2.remove();
+				   }
+			   }
+		   }
+	   }
+   }
 }

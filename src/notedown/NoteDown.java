@@ -15,6 +15,7 @@ import javax.xml.stream.XMLStreamException;
 
 import music_notation.Chord;
 import music_notation.MusicXML;
+import music_notation.Note;
 
 import jm.util.Read;
 import capture.AudioCapture;
@@ -61,17 +62,15 @@ public class NoteDown {
 		System.out.println("Audio byte length: " + ac.getAudioBytes().length);
 
 		// Initialize instance for onset detection
-		OnsetDetection od = new OnsetDetection(sampleSize);
-		PCP p = new PCP();
+		OnsetDetection onsetDetection = new OnsetDetection(sampleSize);
+		PCP pcp = new PCP();
 		DFT dft = new DFT(sampleSize, samplingRate);
 
 		// Read the audio file
 		WaveDecoder decoder = null;
 		WaveDecoder decoder2 = null;
 		try {
-			decoder = new WaveDecoder(new FileInputStream("/Users/christian/Music/chord_cd.wav"));
-			decoder2 = new WaveDecoder(new FileInputStream("/Users/christian/Music/chord_cd.wav"));
-
+			decoder = new WaveDecoder(new FileInputStream("/Users/christian/Music/chord_ae.wav"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -101,9 +100,9 @@ public class NoteDown {
 			// fftAudioSamples.add(samples);
 
 			// Calculate the spectrum flux for the given sample
-			od.setAudioData(samples);
+			onsetDetection.setAudioData(samples);
 			audioVec.add(fft.getSpectrum());
-			od.calculateSpectrumFlux(fft.getSpectrum());
+			onsetDetection.calculateSpectrumFlux(fft.getSpectrum());
 			// System.out.println(count + " Power C: " + fft.getFreq(130));
 			// System.out.println(count + " Power D: " + fft.getFreq(146));
 			count++;
@@ -111,23 +110,24 @@ public class NoteDown {
 		System.out.println("Sample count: " + originalAudioSamples.size());
 
 		// Find peaks/onsets an store them in a list
-		od.findPeaks();
-		ArrayList<Peak> peaks = od.getTimeOfPeaks();
+		onsetDetection.findPeaks();
+		ArrayList<Peak> peaks = onsetDetection.getTimeOfPeaks();
 		int startIndex = 0;
 		int endIndex = 0;
 		FFT fft2 = new FFT(sampleSize, samplingRate);
 		fft2.window(FFT.HAMMING);
 
-		/*
 		for (int x = 0; x < peaks.size(); x++) {
 			int sampleCount = 0;
 			System.out.println("Start: " + peaks.get(x).getStartTime());
-			System.out.println("Start index: " + od.getIndex(peaks.get(x).getStartTime()));
-			startIndex = od.getIndex(peaks.get(x).getStartTime());
+			System.out.println("Start index: " + onsetDetection.getIndex(peaks.get(x).getStartTime()));
+			startIndex = onsetDetection.getIndex(peaks.get(x).getStartTime());
 
 			System.out.println("Ende: " + peaks.get(x).getEndTime());
-			System.out.println("End index: " + od.getIndex(peaks.get(x).getEndTime()));
-			endIndex = od.getIndex(peaks.get(x).getEndTime());
+			System.out.println("End index: " + onsetDetection.getIndex(peaks.get(x).getEndTime()));
+			endIndex = onsetDetection.getIndex(peaks.get(x).getEndTime());
+			
+			// Read samples from file
 			try {
 				decoder2 = new WaveDecoder(new FileInputStream("/Users/christian/Music/chord_ae.wav"));
 			} catch (FileNotFoundException e) {
@@ -137,17 +137,20 @@ public class NoteDown {
 			}
 			while (decoder2.readSamples(samples2) > 0) {
 				if (sampleCount >= startIndex && sampleCount <= endIndex) {
-					System.out.println("IN IF");
+					
+					// FFT for samples with chords
 					fft2.forward(samples2);
 
-					// Search for the notes included in the sample
+					// Search for the notes in the sample
 					ma.getNotesInSignal(fft2);
 
 					Similarity s = new Similarity();
-
+					ma.sortNoteStorage();
+					//ma.removeSameNotes();
 					// Find Chords and Notes
-					if (ma.wasChordPlayed()) {
-						s.cosineSimilarity(ma.getChord());
+					//if (ma.wasChordPlayed()) {
+					if (ma.chordPlayed()) {
+						s.cosineSimilarity(ma.getChord2());
 						Chord foundChord = s.getChordWithHighestSimilarity();
 						System.out.println("Chord: " + foundChord.getChordName());
 					} else {
@@ -160,64 +163,24 @@ public class NoteDown {
 					}
 
 					//dft.performDFT2(samples2);
+					System.out.println("Storage: " + ma.getNoteStoreage().size());
+					
+					Iterator<Note> nIt = ma.getNoteStoreage().iterator();
+					int noteCount = 0;
+					while(nIt.hasNext() && noteCount < 4){
+						Note n = nIt.next();
+						System.out.println("Freq: " + n.getFrequency() + " Amp: " + n.getAmplitude());
+						noteCount++;
+						
+					}
+					//if((endIndex - startIndex) <= 1){
+						ma.cleanNoteStorage();
+					//}
+
 				}
 				sampleCount++;
 			}
-		}*/
-		
-		while (decoder2.readSamples(samples2) > 0) {			
-			if(sampleCount == 15){
-				fft2.forward(samples2);
-				dft.performDFT2(samples2);
-			}
-			sampleCount++;
 		}
-		for (int x = 0; x < peaks.size(); x++) {
-			startIndex = od.getIndex(peaks.get(x).getStartTime());
-			endIndex = od.getIndex(peaks.get(x).getEndTime());
-		  // Transform found samples 
-		for(int z = startIndex; z <= endIndex;z++){ 
-			
-			float[] buffer = audioVec.elementAt(z); 
-			
-		  
-		  //System.arraycopy(originalAudioSamples.get(z), 0, buffer, 0,originalAudioSamples.get(z).length); 
-			//fft2.forward(buffer);
-		  
-		  // Search for the notes included in the sample
-		  //ma.getNotesInSignal(fft2);
-			ma.getNotesInSignal(buffer);
-		  //p.createProfile(fft2, sampleSize);
-		  Similarity s = new Similarity();
-		  
-		  // Find Chords and Notes 
-		 if(ma.wasChordPlayed()){
-			  s.cosineSimilarity(ma.getChord()); 
-			  Chord foundChord = s.getChordWithHighestSimilarity(); 
-			  System.out.println("Chord: " + foundChord.getChordName()); 
-		  } else{ 
-			  Iterator<Float> it = ma.getMaxFrequencys().iterator(); 
-			  float last = 0f; 
-			  while(it.hasNext()) { 
-				  last = it.next(); 
-			  } 
-			  System.out.println("Note: " + ma.getNameOfNote(last)); 
-		  } 
-		}
-		}
-		
-		 
-
-		/*
-		 * Similarity s = new Similarity(); // Find Chords and Notes
-		 * if(ma.wasChordPlayed()){ s.cosineSimilarity(ma.getChord()); Chord
-		 * foundChord = s.getChordWithHighestSimilarity();
-		 * System.out.println("Chord: " + foundChord.getChordName()); } else{
-		 * Iterator<Float> it = ma.getMaxFrequencys().iterator(); float last =
-		 * 0f; while (it.hasNext()) { last = it.next(); }
-		 * System.out.println("Note: " + ma.getNameOfNote(last)); }
-		 */
-
 		MusicXML xml = new MusicXML();
 
 	}
