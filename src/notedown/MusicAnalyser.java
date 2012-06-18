@@ -32,9 +32,21 @@ public class MusicAnalyser {
     private float amplitudeThreshold;
     private float[] spectrum;
     
+    /**
+     * Initialize MusicAnalyser instance
+     */
     public MusicAnalyser(){
     	this.chordPlayed = false;
     	this.amplitudeThreshold = 2f;
+    }
+    
+    /**
+     * Initialize MusicAnalyser instance
+     * @param threshold The threshold for the amplitude value. Only amplitudes over the threshold will be processed
+     */
+    public MusicAnalyser(float threshold){
+    	this.chordPlayed = false;
+    	this.amplitudeThreshold = threshold;
     }
     
     /**
@@ -189,6 +201,11 @@ public class MusicAnalyser {
     	return this.maxFreq;
     }
     
+    /**
+     * Get name of note for a given frequency
+     * @param f Frequency
+     * @return Name as string
+     */
     public String getNameOfNote(float f){  
     	String name = null;
     	int i = this.getNoteIndex(f);
@@ -348,7 +365,7 @@ public class MusicAnalyser {
     }
     
     /**
-     * Deletes all entries in the note Vector
+     * Delete all entries in the note Vector
      */
     public void cleanNoteStorage(){
     	this.noteStore.clear();

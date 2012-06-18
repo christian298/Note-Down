@@ -74,8 +74,32 @@ public class Similarity {
 	/**
 	 * Calculate the hamming distance 
 	 */
-	public void hamming(){
-		
+	public void hamming(short[] detectedChord){
+		Iterator<Chord> it = this.chordTemplates.iterator();
+		Chord highestDist = null;
+		int tmpDist = 0;
+		while(it.hasNext()){
+			int dist = 0;
+			Chord tmpChord = it.next();
+			short[] c = tmpChord.getChordVector();
+			for(int i = 0; i< c.length; i++){
+				if(detectedChord[i] != c[i]){
+					dist++;
+				}
+			}
+			if(dist > tmpDist){
+				tmpDist = dist;
+				highestDist = tmpChord;
+			}
+		}		
+		this.highestSimilarity = highestDist;
 	}
 	
+	public void dice(){
+		Iterator<Chord> it = this.chordTemplates.iterator();
+		
+		while(it.hasNext()){
+			
+		}
+	}
 }

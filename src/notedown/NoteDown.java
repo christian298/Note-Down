@@ -70,7 +70,7 @@ public class NoteDown {
 		WaveDecoder decoder = null;
 		WaveDecoder decoder2 = null;
 		try {
-			decoder = new WaveDecoder(new FileInputStream("/Users/christian/Music/chord_ae.wav"));
+			decoder = new WaveDecoder(new FileInputStream("/Users/christian/Music/chord_cd.wav"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -116,6 +116,7 @@ public class NoteDown {
 		int endIndex = 0;
 		FFT fft2 = new FFT(sampleSize, samplingRate);
 		fft2.window(FFT.HAMMING);
+		MusicXML xml = new MusicXML();
 
 		for (int x = 0; x < peaks.size(); x++) {
 			int sampleCount = 0;
@@ -129,14 +130,19 @@ public class NoteDown {
 			
 			// Read samples from file
 			try {
-				decoder2 = new WaveDecoder(new FileInputStream("/Users/christian/Music/chord_ae.wav"));
+				decoder2 = new WaveDecoder(new FileInputStream("/Users/christian/Music/chord_cd.wav"));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			
+			boolean moreThanOneSample = false;
+			int counter = 0;
+			
 			while (decoder2.readSamples(samples2) > 0) {
 				if (sampleCount >= startIndex && sampleCount <= endIndex) {
+					
 					
 					// FFT for samples with chords
 					fft2.forward(samples2);
@@ -146,22 +152,26 @@ public class NoteDown {
 
 					Similarity s = new Similarity();
 					ma.sortNoteStorage();
-					//ma.removeSameNotes();
-					// Find Chords and Notes
-					//if (ma.wasChordPlayed()) {
-					if (ma.chordPlayed()) {
-						s.cosineSimilarity(ma.getChord2());
-						Chord foundChord = s.getChordWithHighestSimilarity();
-						System.out.println("Chord: " + foundChord.getChordName());
-					} else {
-						Iterator<Float> it = ma.getMaxFrequencys().iterator();
-						float last = 0f;
-						while (it.hasNext()) {
-							last = it.next();
-						}
-						System.out.println("Note: " + ma.getNameOfNote(last));
-					}
 
+					if(counter == (endIndex - startIndex)){
+						// Find Chords and Notes
+						//if (ma.wasChordPlayed()) {
+						if (ma.chordPlayed()) {
+							s.cosineSimilarity(ma.getChord2());
+							Chord foundChord = s.getChordWithHighestSimilarity();
+							System.out.println("Chord: " + foundChord.getChordName());
+							xml.writeChord(foundChord.getXMLFriendlyVector());
+						} else {
+							Iterator<Float> it = ma.getMaxFrequencys().iterator();
+							float last = 0f;
+							while (it.hasNext()) {
+								last = it.next();
+							}
+							System.out.println("Note: " + ma.getNameOfNote(last));
+						}
+						ma.cleanNoteStorage();
+						counter = 0;
+					}
 					//dft.performDFT2(samples2);
 					System.out.println("Storage: " + ma.getNoteStoreage().size());
 					
@@ -173,15 +183,26 @@ public class NoteDown {
 						noteCount++;
 						
 					}
-					//if((endIndex - startIndex) <= 1){
+					
+					if((endIndex - startIndex) >= 1){
+						moreThanOneSample = true;
+						counter++;
+					} else{
 						ma.cleanNoteStorage();
-					//}
-
+					}
+					
+					/*if(counter == (endIndex - startIndex)){
+						ma.cleanNoteStorage();
+						counter = 0;
+					}*/
+					
+					
+					//ma.cleanNoteStorage();
+					
 				}
 				sampleCount++;
 			}
 		}
-		MusicXML xml = new MusicXML();
-
+		xml.finalize();
 	}
 }
