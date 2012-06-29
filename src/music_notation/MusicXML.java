@@ -222,10 +222,67 @@ public class MusicXML {
 
 	}
 	
-	public void writeNote(String s, String f){
-	
+	public void writeNote(String noteName, Integer oct){
+		Element m = new Element("measure");
+		m.setAttribute("number", this.measureCount.toString());
+		m.setAttribute("width", "485");
+		if(this.measureCount == 1){
+			Element attributes = new Element("attributes");
+			
+			Element divison = new Element("divisions");
+			divison.addContent(new Text("1"));
+			
+			Element key = new Element("key");
+			Element fifths = new Element("fifths");
+			fifths.addContent(new Text("0"));
+			Element mode = new Element("mode");
+			mode.addContent(new Text("major"));
+			key.addContent(fifths);
+			key.addContent(mode);
+			
+			attributes.addContent(divison);
+			attributes.addContent(key);
+			
+			Element clef = new Element("clef");
+			Element sign = new Element("sign");
+			sign.addContent(new Text("TAB"));
+			Element line = new Element("line");
+			line.addContent(new Text("5"));
+			clef.addContent(sign);
+			clef.addContent(line);
+			
+			attributes.addContent(clef);
+			this.setTuning(attributes);
+			//this.measure.addContent(attributes);
+			m.addContent(attributes);						
+		}
+		// Create note attribute
+		Element note = new Element("note");
+		Element pitch = new Element("pitch");
+		Element step = new Element("step");
+		step.addContent(new Text(noteName));
+		Element octave = new Element("octave");
+		octave.addContent(new Text(oct.toString()));
+		pitch.addContent(step);
+		pitch.addContent(octave);
+		
+		note.addContent(pitch);
+		
+		Element duration = new Element("duration");
+		duration.addContent(new Text("1"));
+		note.addContent(duration);
+		
+		Element type = new Element("type");
+		type.addContent(new Text("quarter"));
+		note.addContent(type);
+		m.addContent(note);
+		this.part.addContent(m);
 	}
 	
+	/**
+	 * Add a chord to the xml document
+	 * @param chord Vector of notes
+	 */
 	public void writeChord(Vector<Note> chord){
 		int tagCount = 0;
 		Iterator<Note> it = chord.iterator();
@@ -282,16 +339,30 @@ public class MusicXML {
 				Element chordTag = new Element("chord");
 				note.addContent(chordTag);
 			}
+			// If note is semitone add alter attribute
+			if(n.getName().contains("#")){				
+				Element pitch = new Element("pitch");
+				Element step = new Element("step");
+				step.addContent(new Text(n.getName().replace("#", "")));
+				Element octave = new Element("octave");
+				octave.addContent(new Text(n.getOctave().toString()));
+				pitch.addContent(step);
+				pitch.addContent(octave);			
+				Element alter = new Element("alter");
+				alter.addContent(new Text("1"));
+				pitch.addContent(alter);
+				note.addContent(pitch);
+			} else{				
+				Element pitch = new Element("pitch");
+				Element step = new Element("step");
+				step.addContent(new Text(n.getName()));
+				Element octave = new Element("octave");
+				octave.addContent(new Text(n.getOctave().toString()));
+				pitch.addContent(step);
+				pitch.addContent(octave);
+				note.addContent(pitch);
+			}
 			
-			Element pitch = new Element("pitch");
-			Element step = new Element("step");
-			step.addContent(new Text(n.getName()));
-			Element octave = new Element("octave");
-			octave.addContent(new Text(n.getOctave().toString()));
-			pitch.addContent(step);
-			pitch.addContent(octave);
-			
-			note.addContent(pitch);
 			
 			Element duration = new Element("duration");
 			duration.addContent(new Text("1"));

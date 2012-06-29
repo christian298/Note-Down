@@ -66,8 +66,8 @@
       <note>
         <chord />
         <pitch>
-          <step>G</step>
-          <octave>2</octave>
+          <step>C</step>
+          <octave>3</octave>
         </pitch>
         <duration>1</duration>
         <type>quarter</type>
@@ -87,6 +87,7 @@
         <pitch>
           <step>F</step>
           <octave>4</octave>
+          <alter>1</alter>
         </pitch>
         <duration>1</duration>
         <type>quarter</type>

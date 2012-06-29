@@ -37,7 +37,7 @@ public class Chord {
 		if(this.name == "C"){
 			this.xmlChordVector.add(new Note("C", 4));
 			this.xmlChordVector.add(new Note("E", 3));
-			this.xmlChordVector.add(new Note("G", 2));
+			this.xmlChordVector.add(new Note("C", 3));
 		} else if(this.name == "D"){
 			this.xmlChordVector.add(new Note("D", 4));
 			this.xmlChordVector.add(new Note("F#", 4));

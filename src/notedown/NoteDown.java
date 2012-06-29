@@ -41,25 +41,25 @@ public class NoteDown {
 			System.out.println("Audio devices: " + aInfos[i]);
 		}
 
-		AudioCapture ac = new AudioCapture(aInfos[1]);
+		AudioCapture audioCapture = new AudioCapture(aInfos[1]);
 
 		// Start and stop recording
 		System.out.println("Press ENTER to start the recording.");
 		try {
 			System.in.read();
-			ac.startRecording();
+			audioCapture.startRecording();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		System.out.println("Press ENTER to stop the recording.");
 		try {
 			System.in.read();
-			ac.stopRecording();
+			audioCapture.stopRecording();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		System.out.println("Audio byte length: " + ac.getAudioBytes().length);
+		System.out.println("Audio byte length: " + audioCapture.getAudioBytes().length);
 
 		// Initialize instance for onset detection
 		OnsetDetection onsetDetection = new OnsetDetection(sampleSize);
@@ -81,7 +81,7 @@ public class NoteDown {
 		FFT fft = new FFT(sampleSize, samplingRate);
 
 		// Initialize an for music analysis
-		MusicAnalyser ma = new MusicAnalyser();
+		MusicAnalyser musicAnalyser = new MusicAnalyser();
 
 		// Use Hamming-window for the signal
 		fft.window(FFT.HAMMING);
@@ -111,7 +111,7 @@ public class NoteDown {
 
 		// Find peaks/onsets an store them in a list
 		onsetDetection.findPeaks();
-		ArrayList<Peak> peaks = onsetDetection.getTimeOfPeaks();
+		ArrayList<Peak> peaks = onsetDetection.getPeaks();
 		int startIndex = 0;
 		int endIndex = 0;
 		FFT fft2 = new FFT(sampleSize, samplingRate);
@@ -148,34 +148,35 @@ public class NoteDown {
 					fft2.forward(samples2);
 
 					// Search for the notes in the sample
-					ma.getNotesInSignal(fft2);
+					musicAnalyser.getNotesInSignal(fft2);
 
 					Similarity s = new Similarity();
-					ma.sortNoteStorage();
+					musicAnalyser.sortNoteStorage();
 
 					if(counter == (endIndex - startIndex)){
 						// Find Chords and Notes
 						//if (ma.wasChordPlayed()) {
-						if (ma.chordPlayed()) {
-							s.cosineSimilarity(ma.getChord2());
+						if (musicAnalyser.chordPlayed()) {
+							s.cosineSimilarity(musicAnalyser.getChord2());
 							Chord foundChord = s.getChordWithHighestSimilarity();
 							System.out.println("Chord: " + foundChord.getChordName());
 							xml.writeChord(foundChord.getXMLFriendlyVector());
 						} else {
-							Iterator<Float> it = ma.getMaxFrequencys().iterator();
+							Iterator<Float> it = musicAnalyser.getMaxFrequencys().iterator();
 							float last = 0f;
 							while (it.hasNext()) {
 								last = it.next();
 							}
-							System.out.println("Note: " + ma.getNameOfNote(last));
+							System.out.println("Note: " + musicAnalyser.getNameOfNote(last));
+							xml.writeNote(musicAnalyser.getNameOfNote(last), musicAnalyser.getOcteveOfNote(last));
 						}
-						ma.cleanNoteStorage();
+						musicAnalyser.cleanNoteStorage();
 						counter = 0;
 					}
 					//dft.performDFT2(samples2);
-					System.out.println("Storage: " + ma.getNoteStoreage().size());
+					System.out.println("Storage: " + musicAnalyser.getNoteStoreage().size());
 					
-					Iterator<Note> nIt = ma.getNoteStoreage().iterator();
+					Iterator<Note> nIt = musicAnalyser.getNoteStoreage().iterator();
 					int noteCount = 0;
 					while(nIt.hasNext() && noteCount < 4){
 						Note n = nIt.next();
@@ -188,7 +189,7 @@ public class NoteDown {
 						moreThanOneSample = true;
 						counter++;
 					} else{
-						ma.cleanNoteStorage();
+						musicAnalyser.cleanNoteStorage();
 					}
 					
 					/*if(counter == (endIndex - startIndex)){

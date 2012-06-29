@@ -400,4 +400,18 @@ public class MusicAnalyser {
 		   }
 	   }
    }
+   
+   public Integer getOcteveOfNote(float freq){
+	   int oct = 0;
+	   for(int o = 2; o <= 5; o++){
+			for(int n = 0; n <= 11; n++){
+				float f = this.calculateFrequencyOfNote(o, n);
+				if(f == freq){
+					oct = o;
+					break;
+				}
+			}
+	   }
+	   return oct;
+   }
 }

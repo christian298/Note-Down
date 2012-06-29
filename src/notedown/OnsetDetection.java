@@ -109,7 +109,7 @@ public class OnsetDetection {
 	 * Get the start and end time of the peaks 
 	 * @return ArrayList Returns an list of peaks
 	 */
-	public ArrayList<Peak> getTimeOfPeaks() {				
+	public ArrayList<Peak> getPeaks() {				
 		ArrayList<Peak> peakList = new ArrayList<Peak>();
 		float startTime = 0;
 		float endTime = 0;
@@ -136,7 +136,11 @@ public class OnsetDetection {
 		this.audio = audioData;
 	}
 	
-	public List<Float> getPeaks(){
+	/**
+	 * Get a list with calculated values for the peaks
+	 * @return List with float values
+	 */
+	public List<Float> getOnsetValues(){
 		return this.peaks;
 	}
 }
