@@ -34,6 +34,7 @@ public class NoteDown {
 		float[] tmpSamples = new float[sampleSize];
 		ArrayList<float[]> originalAudioSamples = new ArrayList<float[]>();
 		Vector<float[]> audioVec = new Vector<float[]>();
+		String input = "/Users/christian/Music/Chords/Chord_D.wav";
 
 		// Get available audio devices
 		Mixer.Info[] aInfos = AudioSystem.getMixerInfo();
@@ -70,7 +71,7 @@ public class NoteDown {
 		WaveDecoder decoder = null;
 		WaveDecoder decoder2 = null;
 		try {
-			decoder = new WaveDecoder(new FileInputStream("/Users/christian/Music/chord_cd.wav"));
+			decoder = new WaveDecoder(new FileInputStream(input));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -101,7 +102,7 @@ public class NoteDown {
 
 			// Calculate the spectrum flux for the given sample
 			onsetDetection.setAudioData(samples);
-			audioVec.add(fft.getSpectrum());
+			//audioVec.add(fft.getSpectrum());
 			onsetDetection.calculateSpectrumFlux(fft.getSpectrum());
 			// System.out.println(count + " Power C: " + fft.getFreq(130));
 			// System.out.println(count + " Power D: " + fft.getFreq(146));
@@ -112,8 +113,10 @@ public class NoteDown {
 		// Find peaks/onsets an store them in a list
 		onsetDetection.findPeaks();
 		ArrayList<Peak> peaks = onsetDetection.getPeaks();
+		
 		int startIndex = 0;
 		int endIndex = 0;
+		
 		FFT fft2 = new FFT(sampleSize, samplingRate);
 		fft2.window(FFT.HAMMING);
 		MusicXML xml = new MusicXML();
@@ -130,7 +133,7 @@ public class NoteDown {
 			
 			// Read samples from file
 			try {
-				decoder2 = new WaveDecoder(new FileInputStream("/Users/christian/Music/chord_cd.wav"));
+				decoder2 = new WaveDecoder(new FileInputStream(input));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (Exception e) {
@@ -150,15 +153,16 @@ public class NoteDown {
 					// Search for the notes in the sample
 					musicAnalyser.getNotesInSignal(fft2);
 
-					Similarity s = new Similarity();
+					Similarity similarity = new Similarity();
 					musicAnalyser.sortNoteStorage();
 
 					if(counter == (endIndex - startIndex)){
 						// Find Chords and Notes
 						//if (ma.wasChordPlayed()) {
 						if (musicAnalyser.chordPlayed()) {
-							s.cosineSimilarity(musicAnalyser.getChord2());
-							Chord foundChord = s.getChordWithHighestSimilarity();
+							similarity.cosineSimilarity(musicAnalyser.getChord());
+							//similarity.hamming(musicAnalyser.getChord());
+							Chord foundChord = similarity.getChordWithHighestSimilarity();
 							System.out.println("Chord: " + foundChord.getChordName());
 							xml.writeChord(foundChord.getXMLFriendlyVector());
 						} else {

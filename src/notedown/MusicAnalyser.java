@@ -270,7 +270,7 @@ public class MusicAnalyser {
     		return false;
     	}
     }
-    
+/*    
     public short[] getChord(){   
     	Vector<Integer> tmp = new Vector<Integer>();
     	Iterator<Float> it = this.maxFreq.iterator();    	
@@ -291,8 +291,8 @@ public class MusicAnalyser {
 	    }   
 	    return chord;
     }
-    
-    public short[] getChord2(){
+*/    
+    public short[] getChord(){
     	short[] chord = new short[12];
     	Vector<Integer> tmp = new Vector<Integer>();
     	Iterator<Note> it = this.noteStore.iterator();

@@ -77,7 +77,7 @@ public class Similarity {
 	public void hamming(short[] detectedChord){
 		Iterator<Chord> it = this.chordTemplates.iterator();
 		Chord highestDist = null;
-		int tmpDist = 0;
+		int tmpDist = 100;
 		while(it.hasNext()){
 			int dist = 0;
 			Chord tmpChord = it.next();
@@ -87,7 +87,7 @@ public class Similarity {
 					dist++;
 				}
 			}
-			if(dist > tmpDist){
+			if(dist < tmpDist){
 				tmpDist = dist;
 				highestDist = tmpChord;
 			}
