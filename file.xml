@@ -48,8 +48,8 @@
       </attributes>
       <note>
         <pitch>
-          <step>D</step>
-          <octave>4</octave>
+          <step>H</step>
+          <octave>3</octave>
         </pitch>
         <duration>1</duration>
         <type>quarter</type>
@@ -57,7 +57,7 @@
       <note>
         <chord />
         <pitch>
-          <step>F</step>
+          <step>D</step>
           <octave>4</octave>
           <alter>1</alter>
         </pitch>
@@ -67,8 +67,47 @@
       <note>
         <chord />
         <pitch>
+          <step>F</step>
+          <octave>3</octave>
+          <alter>1</alter>
+        </pitch>
+        <duration>1</duration>
+        <type>quarter</type>
+      </note>
+    </measure>
+    <measure number="2" width="485">
+      <note>
+        <pitch>
+          <step>F</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>1</duration>
+        <type>quarter</type>
+      </note>
+      <note>
+        <chord />
+        <pitch>
           <step>A</step>
           <octave>3</octave>
+        </pitch>
+        <duration>1</duration>
+        <type>quarter</type>
+      </note>
+      <note>
+        <chord />
+        <pitch>
+          <step>C</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>1</duration>
+        <type>quarter</type>
+      </note>
+    </measure>
+    <measure number="3" width="485">
+      <note>
+        <pitch>
+          <step>F#</step>
+          <octave>5</octave>
         </pitch>
         <duration>1</duration>
         <type>quarter</type>

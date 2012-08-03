@@ -22,22 +22,20 @@ import com.sun.org.apache.bcel.internal.generic.NEW;
 import dsp.FFT;
 
 public class MusicAnalyser {
-    private ArrayList<Float> ampList = new ArrayList<Float>();
     private Map<Float, Float> notes = new HashMap<Float, Float>();
     private Vector<Note> noteStore = new Vector<Note>();
     private Set<Float> maxFreq = new HashSet<Float>();
     private boolean chordPlayed;
-    private int sameFrequencyCount;
-    private short[] chordVec; 
     private float amplitudeThreshold;
     private float[] spectrum;
+    private float mean;
     
     /**
      * Initialize MusicAnalyser instance
      */
     public MusicAnalyser(){
     	this.chordPlayed = false;
-    	this.amplitudeThreshold = 2f;
+    	this.amplitudeThreshold = 11f;
     }
     
     /**
@@ -49,11 +47,30 @@ public class MusicAnalyser {
     	this.amplitudeThreshold = threshold;
     }
     
+    private void calcMeanThreshold(){
+    	float mean = 0;
+    	for(int i = 0; i < this.noteStore.size(); i++){
+    		mean += this.noteStore.get(i).getAmplitude();
+    	}
+    	this.mean = (mean / 8.5f);
+    	System.out.println("mean: " + (mean / 8.5f));
+    }
+    
+    private void cleanNotesByMeanValue(){
+    	Iterator<Note> it = this.noteStore.iterator();
+    	while(it.hasNext()){
+    		Note n = it.next();
+    		if(n.getAmplitude() < this.mean){
+    			it.remove();
+    		}
+    	}
+    }
+    
     /**
      * Calculates the amplitude for all 12 notes
      * @param f The fft instance
      */
-	public void getNotesInSignal(FFT f){
+	public void getNotesInSignal(FFT f){		
 		// Octave 2 to 5
 		for(int o = 2; o <= 5; o++){
 			// Notes 0 to 11
@@ -62,20 +79,23 @@ public class MusicAnalyser {
 				float freq = this.calculateFrequencyOfNote(o, n);
 				// Amplitude for note
 				float amp = f.getFreq(freq);
-
+				
 				// Get only notes with amplitudes over the given threshold
 				if(amp > this.amplitudeThreshold){
 					//this.notes.put(amp, this.calculateFrequencyOfNote(o, n));
 					String name = this.getNameOfNote(freq);
-					System.out.println("Freq: " + freq + "Amp: " + amp + " Name: " + name);
+					
 					this.notes.put(freq, amp);
 					
 					if(this.storeNote(freq, amp, name)){
 						this.noteStore.add(new Note(freq, amp, name));
+						//System.out.println("Frequency: " + freq + " Amplitude: " + amp + " Name: " + name);
 					}
 				}
 			}
 		}
+		this.calcMeanThreshold();
+		this.cleanNotesByMeanValue();
 		this.findMaxAmplitude();
 		//this.maxAmp();
 	}
@@ -142,11 +162,17 @@ public class MusicAnalyser {
 	    }	    	    
 	}
 	
-	private void maxAmp(){
+	public Note maxAmp(){
 		Iterator<Note> it = this.noteStore.iterator();
-		while(it.hasNext()){
+		/*while(it.hasNext()){
 			Note n = it.next();
 			System.out.println("F: " + n.getFrequency() + "A: " + n.getAmplitude());
+		}*/
+		if(it.hasNext()){
+			//System.out.println("first: " + this.noteStore.firstElement().getName());
+			return this.noteStore.firstElement();
+		} else{
+			return null;
 		}
 	}
 	
@@ -162,13 +188,16 @@ public class MusicAnalyser {
 		while(noteIt.hasNext()){			
 			Note n = noteIt.next();
 			if(n.getName() == name){
-			//if(n.getFrequency() == f){
-				if(n.getAmplitude() < a){
+				/*if(n.getAmplitude() < a){
 					saveTheNote = true;
 					noteIt.remove();
 				} else{
 					saveTheNote = false;
-				}
+				}*/
+				n.increaseAmplitude(a);
+				saveTheNote = false;
+			} else{
+				saveTheNote = true;
 			}
 		}
 		return saveTheNote;
@@ -264,7 +293,7 @@ public class MusicAnalyser {
     }
     
     public boolean chordPlayed(){
-    	if(this.noteStore.size() > 1){
+    	if(this.noteStore.size() > 2){
     		return true;
     	} else{
     		return false;

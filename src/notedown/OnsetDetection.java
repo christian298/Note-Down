@@ -62,7 +62,7 @@ public class OnsetDetection {
 	/**
 	 * Finds the peaks in the audiodata, based on the spectral flux. 
 	 */
-	public void findPeaks() {
+	public List<Float> findPeaks() {
 		for (int x = 0; x < this.spectralFlux.size(); x++) {
 			int start = Math.max(0, x - 10);
 			int end = Math.min(this.spectralFlux.size() - 1, x + 10);
@@ -88,10 +88,8 @@ public class OnsetDetection {
 			} else {
 				this.peaks.add((float) 0);
 			}
-		}
-		for (int y = 0; y < this.peaks.size(); y++) {
-			System.out.println(y + " Peaks: " + this.peaks.get(y));
-		}
+		}		
+		return this.peaks;
 	}
 	
 	/**

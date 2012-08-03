@@ -51,6 +51,10 @@ public class Note{
 		return this.amplitude;
 	}
 	
+	public void increaseAmplitude(float amp){
+		this.amplitude += amp;
+	}
+	
 	/**
 	 * The frequency of the note
 	 * @return Frequency

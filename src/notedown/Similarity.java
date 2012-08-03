@@ -1,8 +1,13 @@
 package notedown;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 import music_notation.Chord;
+import music_notation.Note;
 /**
  * Computes the similarity between a detected chord and the template chords
  * @author christian
@@ -21,11 +26,15 @@ public class Similarity {
 	 * Find a matching Template for the detected Chord
 	 * @param detectedChord The detected Chord
 	 */
-	public void cosineSimilarity(short[] detectedChord){
+	public void cosineSimilarity(short[] detectedChord, Vector<Note> notes){
 		float tmpCos = 0;
+		float sameCos = 0;
 		Chord chord;
 		Chord tmpChord = null;
-		Iterator<Chord> it = chordTemplates.iterator();
+		Chord sameChord = null;
+		Iterator<Chord> it = chordTemplates.iterator();	
+		Vector<Chord> sameSim = new Vector<Chord>();
+		Map<Chord, Float> same = new HashMap<Chord, Float>();
 		
 		while(it.hasNext()){
 			chord = it.next();
@@ -39,13 +48,54 @@ public class Similarity {
 				bSum += Math.pow(detectedChord[i], 2);
 			}
 			float cos = (float) (eukl / (Math.sqrt(aSum) * Math.sqrt(bSum)));
-			//System.out.println("cos: " + cos);
-			if(cos > tmpCos){
+			
+			if(cos >= tmpCos){
 				tmpCos = cos;
 				tmpChord = chord;
+//				sameSim.add(chord);
+				same.put(chord, cos);
+			}
+
+			System.out.println("cos: " + cos);
+		}
+		Chord c = this.findPossibleChord(same, tmpCos, notes, tmpChord);
+		System.out.println("C: " + c.getChordName());
+		this.highestSimilarity = tmpChord;
+	}
+	
+	/**
+	 * If more than one chord has the same high Cosine-Similarity find a possible chord by the amplitudes of the found notes in the signal 
+	 * @param sameSim Map with same similarity values
+	 * @param highestCos The highest found similarity value
+	 * @param notes Vector with found notes from the audiosignal
+	 * @param tmpChord Last found chord template
+	 * @return returns a possible chord
+	 */
+	private Chord findPossibleChord(Map<Chord, Float> sameSim, float highestCos, Vector<Note> notes, Chord tmpChord){
+		Iterator<Float> it = sameSim.values().iterator();
+		Vector<Chord> tmp = new Vector<Chord>();
+		int count = 0;
+		Chord c = tmpChord;
+		
+		Iterator<Entry<Chord, Float>> i = sameSim.entrySet().iterator();
+	    while (i.hasNext()) {
+	        Entry<Chord, Float> pairs = i.next();
+	        if((float)pairs.getValue() == highestCos){
+	        	count++;
+	        	tmp.add((Chord) pairs.getKey());
+	        }
+	    }
+			
+		if(tmp.size() > 1){
+			Iterator<Chord> cIt = tmp.iterator();
+			while(cIt.hasNext()){
+				c = cIt.next();
+				if(notes.get(0).getName() == c.getChordName()){					
+					return c;					
+				}
 			}
 		}
-		this.highestSimilarity = tmpChord;
+		return c;
 	}
 	
 	private void fillChordTemplates(){
